@@ -1,20 +1,20 @@
 import * as express from "express";
-import { Endereco, validateEndereco } from "./shared/endereco";
-import { validaEmail } from "./shared/email";
-import { validaSenha } from "./shared/senha";
-import { LoginResponse } from "./shared/login";
+import { Endereco, validateEndereco } from "../shared/endereco";
+import { validaEmail } from "../shared/email";
+import { validaSenha } from "../shared/senha";
+import { LoginResponse } from "../shared/login";
 
 interface CartaoCredito {
-  nome: String;
-  numero: String;
-  mesVencimento: Number;
-  anoVencimento: Number;
+  nome: string;
+  numero: string;
+  mesVencimento: number;
+  anoVencimento: number;
 }
 
 interface RequestBody {
-  nome: String;
-  telefone: String;
-  senha: String;
+  nome: string;
+  telefone: string;
+  senha: string;
   cartao: CartaoCredito;
   endereco: Endereco;
   email: String;

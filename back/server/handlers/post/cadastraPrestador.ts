@@ -1,8 +1,8 @@
 import * as express from "express";
-import { Endereco, validateEndereco } from "./shared/endereco";
-import { validaEmail } from "./shared/email";
-import { validaSenha } from "./shared/senha";
-import { LoginResponse } from "./shared/login";
+import { Endereco, validateEndereco } from "../shared/endereco";
+import { validaEmail } from "../shared/email";
+import { validaSenha } from "../shared/senha";
+import { LoginResponse } from "../shared/login";
 
 interface ContaBancaria {
   nomeBanco: String;

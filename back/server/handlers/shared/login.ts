@@ -1,4 +1,4 @@
 export interface LoginResponse {
-  sessionToken: String;
+  jwt: String;
   nome: String;
 }

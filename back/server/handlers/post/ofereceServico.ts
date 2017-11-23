@@ -1,11 +1,13 @@
 import * as express from "express";
 
 interface RequestBody {
-  nome: String;
-  tipo: Number;
+  descricao: String;
+  lat: Number;
+  lng: Number;
   valorDiaria: Number;
   valorHora: Number;
   valorAtividade: Number;
+  tipoCobranca: Number;
 }
 
 interface Response {
@@ -13,26 +15,35 @@ interface Response {
 }
 
 const validateBody = (body: RequestBody) => {
-  const { nome, tipo, valorAtividade, valorDiaria, valorHora } = body;
+  const {
+    descricao,
+    lat,
+    lng,
+    tipoCobranca,
+    valorAtividade,
+    valorDiaria,
+    valorHora
+  } = body;
+  if (
+    typeof descricao !== "string" ||
+    typeof lat !== "number" ||
+    typeof lng !== "number"
+  )
+    throw Error("Serviço inválido");
 
-  if (typeof nome !== "string" || nome.length < 3 || nome.length > 100)
-    throw Error("Nome inválido");
-
-  if (typeof tipo !== "number") throw Error("Tipo de atividade inválido");
-
-  if (tipo === 0) {
+  if (tipoCobranca === 0) {
     //hora
     if (typeof valorHora !== "number") throw Error("Valor do servico invalido");
-  } else if (tipo === 1) {
+  } else if (tipoCobranca === 1) {
     //diaria
     if (typeof valorDiaria !== "number")
       throw Error("Valor do servico invalido");
-  } else if (tipo === 2) {
+  } else if (tipoCobranca === 2) {
     //atividade
     if (typeof valorAtividade !== "number")
       throw Error("Valor do servico invalido");
   } else {
-    throw Error("Tipo de atividade inválido");
+    throw Error("Tipo de cobranca inválido");
   }
 };
 

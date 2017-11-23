@@ -1,7 +1,7 @@
 import * as express from "express";
-import { validaEmail } from "./shared/email";
-import { validaSenha } from "./shared/senha";
-import { LoginResponse } from "./shared/login";
+import { validaEmail } from "../shared/email";
+import { validaSenha } from "../shared/senha";
+import { LoginResponse } from "../shared/login";
 
 interface RequestBody {
   email: String;
@@ -21,7 +21,7 @@ export default (
 ) => {
   validateBody(req.body);
 
-  const response: LoginResponse = { sessionToken: "abc", nome: "Prestador" };
+  const response: LoginResponse = { jwt: "abc", nome: "Cliente" };
 
   res.json(response);
 };
