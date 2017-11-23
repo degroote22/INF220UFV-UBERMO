@@ -1,0 +1,15 @@
+/cadastracliente
+/cadastraprestador
+/cadastratiposervico
+
+/prestadores?tipo(ordenado decrescente)
+/servicosporcliente
+/financacliente
+/financaprestador
+/servicosmaisprocurados?numero
+/clientesporcontratacoes?tipo
+
+/logincliente
+/loginprestador
+/loginadmin
++3...
