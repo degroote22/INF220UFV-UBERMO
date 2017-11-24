@@ -90,3 +90,14 @@ create table ubermo.contratado(
   comentariocliente text,
   comentarioprestador text
 );
+
+create table ubermo.admin(
+  nome text not null,
+  email text not null primary key,
+  hash text not null
+);
+
+begin;
+insert into ubermo.admin(nome, email, hash) values ('Admin', 'admin@admin.com', crypt('admin', gen_salt('bf')));
+commit;
+

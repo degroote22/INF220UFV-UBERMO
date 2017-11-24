@@ -4,9 +4,9 @@ interface RequestBody {
   descricao: String;
   lat: Number;
   lng: Number;
-  valorDiaria: Number;
-  valorHora: Number;
-  valorAtividade: Number;
+  valorDiaria?: Number;
+  valorHora?: Number;
+  valorAtividade?: Number;
   tipoCobranca: Number;
 }
 
