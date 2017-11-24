@@ -5,8 +5,25 @@ import * as bodyParser from "body-parser";
 // import * as root from "app-root-path";
 // import * as cookieParser from "cookie-parser";
 import * as routes from "./server/routes";
+import * as pgPromise from "pg-promise";
 
 const app = express();
+
+const pgp = pgPromise();
+const cn = {
+  host: "localhost",
+  port: 5432,
+  database: "ubermo",
+  user: "ubermo",
+  password: "ubermo"
+};
+
+const db = pgp(cn);
+
+// db
+//   .any("SELECT * FROM UBERMO.TIPO")
+//   .then(console.log)
+//   .catch(console.error);
 
 // view engine setup
 // app.set("views", `${root}/server/views/`);
@@ -21,6 +38,14 @@ app.use(bodyParser.json());
 // );
 
 // app.use(cookieParser());
+
+app.use(
+  "/",
+  (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    res.locals.db = db;
+    next();
+  }
+);
 
 app.use("/", routes);
 

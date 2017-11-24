@@ -5,7 +5,7 @@ const router = express.Router();
 // POST
 router.post("/cadastracliente", handlers.cadastraCliente);
 router.post("/cadastraprestador", handlers.cadastraPrestador);
-router.post("/cadastraservico", handlers.cadastraServico);
+router.post("/cadastratipo", handlers.cadastraTipo);
 router.post("/logincliente", handlers.loginCliente);
 router.post("/loginprestador", handlers.loginPrestador);
 router.post("/loginadmin", handlers.loginAdmin);

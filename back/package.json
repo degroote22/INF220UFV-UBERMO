@@ -36,6 +36,8 @@
     "cookie-parser": "^1.4.3",
     "ejs": "^2.5.1",
     "express": "^4.15.2",
-    "morgan": "^1.7.0"
+    "jsonwebtoken": "^8.1.0",
+    "morgan": "^1.7.0",
+    "pg-promise": "^7.3.2"
   }
 }

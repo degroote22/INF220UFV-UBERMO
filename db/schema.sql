@@ -4,6 +4,8 @@ drop schema ubermo cascade;
 create schema ubermo;
 comment on schema ubermo is 'O schema da empresa Ubermo';
 
+-- create extension if not exists "pgcrypto";
+
 create table ubermo.tipo(
   id serial primary key,
   nome text not null,
@@ -16,13 +18,21 @@ create table ubermo.ofertado(
   descricao text not null,
   lat double precision not null,
   lng double precision not null,
-  valordiaria integer not null,
-  valorhora integer not null,
-  valoratividade integer not null
+  valordiaria integer,
+  valorhora integer,
+  valoratividade integer
 );
 
-create table enderecoprestador(
-  prestador serial primary key references ubermo.prestador(id),
+create table ubermo.prestador(
+  email text primary key,
+  nome text not null,
+  telefone text not null,
+  nota double precision not null,
+  foto text not null
+);
+
+create table ubermo.enderecoprestador(
+  prestador text primary key references ubermo.prestador(email),
   uf text not null,
   cidade text not null,
   bairro text not null,
@@ -32,14 +42,51 @@ create table enderecoprestador(
   cep text not null  
 );
 
-create table ubermo.prestador(
-  id serial primary key,
-
-);
-
 create table ubermo.conta(
-  prestador serial primary key references ubermo.prestador(id),
+  prestador text primary key references ubermo.prestador(email),
   nomebanco text not null,
   agencia text not null,
   conta text not null
+);
+
+create table ubermo.cliente(
+  email text  primary key,
+  nome text not null,
+  telefone text not null,
+  nota double precision not null,
+  hash text not null
+);
+
+create table ubermo.enderecocliente(
+  cliente text primary key references ubermo.cliente(email),
+  uf text not null,
+  cidade text not null,
+  bairro text not null,
+  logradouro text not null,
+  numero text not null,
+  complemento text not null,
+  cep text not null  
+);
+
+create table ubermo.cartao(
+  cliente text primary key references ubermo.cliente(email),
+  nome text not null,
+  numero text not null,
+  anovencimento serial not null,
+  mesvencimento serial not null
+);
+
+create table ubermo.contratado(
+  id serial primary key,
+  servico serial not null references ubermo.ofertado(id),
+  cliente text not null references ubermo.cliente(email),
+  datapedido timestamp not null,
+  dataconclusao timestamp,
+  quantidadehoras serial,
+  quantidadedias serial,
+  status integer not null,
+  notacliente double precision,
+  notaprestador double precision,
+  comentariocliente text,
+  comentarioprestador text
 );

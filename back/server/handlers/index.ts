@@ -1,6 +1,6 @@
 import cadastraCliente from "./post/cadastraCliente";
 import cadastraPrestador from "./post/cadastraPrestador";
-import cadastraServico from "./post/cadastraPrestador";
+import cadastraTipo from "./post/cadastraTipo";
 import loginCliente from "./post/loginCliente";
 import loginAdmin from "./post/loginAdmin";
 import loginPrestador from "./post/loginPrestador";
@@ -16,7 +16,7 @@ import financaPrestador from "./get/financaPrestador";
 export default {
   cadastraCliente,
   cadastraPrestador,
-  cadastraServico,
+  cadastraTipo,
   loginCliente,
   loginAdmin,
   loginPrestador,

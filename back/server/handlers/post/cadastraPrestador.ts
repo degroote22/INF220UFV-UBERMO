@@ -3,26 +3,30 @@ import { Endereco, validateEndereco } from "../shared/endereco";
 import { validaEmail } from "../shared/email";
 import { validaSenha } from "../shared/senha";
 import { LoginResponse } from "../shared/login";
+import * as pgPromise from "pg-promise";
 
 interface ContaBancaria {
-  nomeBanco: String;
-  agencia: String;
-  conta: String;
+  nomebanco: string;
+  agencia: string;
+  conta: string;
 }
 
 interface RequestBody {
-  nome: String;
-  telefone: String;
-  foto: String;
+  nome: string;
+  telefone: string;
+  foto: string;
   endereco: Endereco;
-  senha: String;
-  email: String;
+  senha: string;
+  email: string;
   conta: ContaBancaria;
 }
 
-const validaConta = (conta: ContaBancaria) => {
-  for (const c in conta)
-    if (typeof conta[c] !== "string") throw Error("Conta bancária inválida.");
+const validaConta = (cb: ContaBancaria) => {
+  if (!cb) throw Error("Conta nao informada");
+  const { nomebanco, agencia, conta } = cb;
+  if (typeof nomebanco !== "string") throw Error("Nome do banco inválido");
+  if (typeof agencia !== "string") throw Error("Agencia do banco inválido");
+  if (typeof conta !== "string") throw Error("Conta do banco inválido");
 };
 
 const validateBody = (body: RequestBody) => {
@@ -54,10 +58,56 @@ export default (
 ) => {
   validateBody(req.body);
 
-  const response: LoginResponse = {
-    nome: "Prestador",
-    sessionToken: "def"
-  };
-
-  res.json(response);
+  const db: pgPromise.IDatabase<{}> = res.locals.db;
+  const body: RequestBody = req.body;
+  const { endereco, conta } = body;
+  db
+    .tx(t =>
+      t
+        .none(
+          "INSERT INTO UBERMO.PRESTADOR (nome, telefone, nota, foto, email) " +
+            "VALUES ($1, $2, $3, $4, $5, crypt($6, gen_salt('bf')))",
+          [body.nome, body.telefone, 0, body.foto, body.email, body.senha]
+        )
+        .then(() =>
+          t.batch([
+            t.none(
+              "INSERT INTO UBERMO.CONTA(prestador, nomebanco, agencia, conta) " +
+                "VALUES ($1, $2, $3, $4)",
+              [body.email, conta.nomebanco, conta.agencia, conta.conta]
+            ),
+            t.none(
+              "INSERT INTO UBERMO.ENDERECOPRESTADOR " +
+                "(prestador, uf, cidade, bairro, logradouro, numero, complemento, cep) " +
+                "values ($1, $2, $3, $4, $5, $6, $7, $8)",
+              [
+                body.email,
+                endereco.uf,
+                endereco.cidade,
+                endereco.bairro,
+                endereco.logradouro,
+                endereco.numero,
+                endereco.complemento,
+                endereco.cep
+              ]
+            )
+          ])
+        )
+    )
+    .then(() => {
+      const response: LoginResponse = {
+        nome: body.nome,
+        jwt: "abc"
+      };
+      res.json(response);
+    })
+    .catch(err => {
+      if (err.code === "23505" /* Unique violation */) {
+        res.status(500);
+        res.json({ message: "E-mail já cadastrado" });
+      } else {
+        res.status(500);
+        res.json(err);
+      }
+    });
 };
