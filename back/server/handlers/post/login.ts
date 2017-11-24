@@ -3,9 +3,9 @@ import { validaEmail } from "../shared/email";
 import { validaSenha } from "../shared/senha";
 import { LoginResponse } from "../shared/login";
 import secret from "../shared/secret";
+import { jwtResponse } from "../shared/jwt";
 import * as pgPromise from "pg-promise";
 import * as jwt from "jsonwebtoken";
-import { jwtResponse } from "../shared/jwt";
 
 interface RequestBody {
   email: string;
@@ -18,7 +18,7 @@ const validateBody = (body: RequestBody) => {
   validaSenha(senha);
 };
 
-export default (
+export default (kind: string) => (
   req: express.Request,
   res: express.Response,
   next: express.NextFunction
@@ -29,7 +29,7 @@ export default (
   const body: RequestBody = req.body;
 
   db
-    .any("SELECT hash, nome FROM ubermo.prestador where email = $1", [
+    .any("SELECT hash, nome FROM ubermo." + kind + " where email = $1", [
       body.email
     ])
     .then((r: any) => {
@@ -39,8 +39,7 @@ export default (
         .one("SELECT * from crypt($1, $2) as hash", [body.senha, r[0].hash])
         .then(r2 => {
           if (r2.hash === r[0].hash) {
-            const jwtr: jwtResponse = { email: body.email, role: "prestador" };
-
+            const jwtr: jwtResponse = { email: body.email, role: kind };
             const response: LoginResponse = {
               jwt: jwt.sign(jwtr, secret, { expiresIn: "1h" }),
               nome: r[0].nome

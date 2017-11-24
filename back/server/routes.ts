@@ -1,16 +1,18 @@
 import * as express from "express";
 import handlers from "./handlers";
+import barrier from "./barrier";
+
 const router = express.Router();
 
 // POST
 router.post("/cadastracliente", handlers.cadastraCliente);
 router.post("/cadastraprestador", handlers.cadastraPrestador);
-router.post("/cadastratipo", handlers.cadastraTipo);
+router.post("/cadastratipo", barrier("admin"), handlers.cadastraTipo);
 router.post("/logincliente", handlers.loginCliente);
 router.post("/loginprestador", handlers.loginPrestador);
 router.post("/loginadmin", handlers.loginAdmin);
-router.post("/ofereceServico", handlers.ofereceServico);
-router.post("/requisitaServico", handlers.requisitaServico);
+router.post("/ofereceservico", handlers.ofereceServico);
+router.post("/requisitaservico", handlers.requisitaServico);
 
 // GET
 router.get("/prestadores", handlers.prestadores);

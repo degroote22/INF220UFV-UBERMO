@@ -2,10 +2,19 @@ import * as express from "express";
 import { validaEmail } from "../shared/email";
 import { validaSenha } from "../shared/senha";
 import { LoginResponse } from "../shared/login";
+import secret from "../shared/secret";
+import { jwtResponse } from "../shared/jwt";
+import * as pgPromise from "pg-promise";
+import * as jwt from "jsonwebtoken";
+
+// {
+//   "jwt": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkbWluQGFkbWluLmNvbSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTUxMTQ5NjIwMywiZXhwIjoxNTExNDk5ODAzfQ.KrUQL-W2Zd76zAru6DmANhyjNZnFI8nHCmMYiV8DRHs",
+//   "nome": "Admin"
+// }
 
 interface RequestBody {
-  email: String;
-  senha: String;
+  email: string;
+  senha: string;
 }
 
 const validateBody = (body: RequestBody) => {
@@ -21,7 +30,36 @@ export default (
 ) => {
   validateBody(req.body);
 
-  const response: LoginResponse = { jwt: "abc", nome: "Admin" };
+  const db: pgPromise.IDatabase<{}> = res.locals.db;
+  const body: RequestBody = req.body;
 
-  res.json(response);
+  db
+    .any("SELECT hash, nome FROM ubermo.admin where email = $1", [body.email])
+    .then((r: any) => {
+      if (!r[0] || !r[0].hash) throw Error("E-mail não existe");
+
+      db
+        .one("SELECT * from crypt($1, $2) as hash", [body.senha, r[0].hash])
+        .then(r2 => {
+          if (r2.hash === r[0].hash) {
+            const jwtr: jwtResponse = { email: body.email, role: "admin" };
+            const response: LoginResponse = {
+              jwt: jwt.sign(jwtr, secret, { expiresIn: "1h" }),
+              nome: r[0].nome
+            };
+            res.json(response);
+          } else {
+            res.status(500);
+            res.json({ message: "Senha errada" });
+          }
+        })
+        .catch(err => {
+          res.status(500);
+          res.json(err);
+        });
+    })
+    .catch(err => {
+      res.status(500);
+      res.json({ message: err.message });
+    });
 };

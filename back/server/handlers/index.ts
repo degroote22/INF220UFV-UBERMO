@@ -1,9 +1,10 @@
 import cadastraCliente from "./post/cadastraCliente";
 import cadastraPrestador from "./post/cadastraPrestador";
 import cadastraTipo from "./post/cadastraTipo";
-import loginCliente from "./post/loginCliente";
-import loginAdmin from "./post/loginAdmin";
-import loginPrestador from "./post/loginPrestador";
+// import loginCliente from "./post/loginCliente";
+// import loginAdmin from "./post/loginAdmin";
+// import loginPrestador from "./post/loginPrestador";
+import login from "./post/login";
 import ofereceServico from "./post/ofereceServico";
 import requisitaServico from "./post/requisitaServico";
 import prestadores from "./get/prestadores";
@@ -17,9 +18,9 @@ export default {
   cadastraCliente,
   cadastraPrestador,
   cadastraTipo,
-  loginCliente,
-  loginAdmin,
-  loginPrestador,
+  loginCliente: login("cliente"),
+  loginAdmin: login("admin"),
+  loginPrestador: login("prestador"),
   ofereceServico,
   requisitaServico,
   prestadores,

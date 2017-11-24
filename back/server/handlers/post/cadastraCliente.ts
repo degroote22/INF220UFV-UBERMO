@@ -5,6 +5,8 @@ import { validaSenha } from "../shared/senha";
 import { LoginResponse } from "../shared/login";
 import * as pgPromise from "pg-promise";
 
+// import * as jwt from "jsonwebtoken";
+
 // {
 // 	"nome": "aaaaaaaaaaa",
 // 	"telefone": "1234-56777",
