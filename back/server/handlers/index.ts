@@ -1,9 +1,6 @@
 import cadastraCliente from "./post/cadastraCliente";
 import cadastraPrestador from "./post/cadastraPrestador";
 import cadastraTipo from "./post/cadastraTipo";
-// import loginCliente from "./post/loginCliente";
-// import loginAdmin from "./post/loginAdmin";
-// import loginPrestador from "./post/loginPrestador";
 import login from "./post/login";
 import ofereceServico from "./post/ofereceServico";
 import requisitaServico from "./post/requisitaServico";

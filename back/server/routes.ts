@@ -11,6 +11,7 @@ router.post("/cadastratipo", barrier("admin"), handlers.cadastraTipo);
 router.post("/logincliente", handlers.loginCliente);
 router.post("/loginprestador", handlers.loginPrestador);
 router.post("/loginadmin", handlers.loginAdmin);
+
 router.post("/ofereceservico", handlers.ofereceServico);
 router.post("/requisitaservico", handlers.requisitaServico);
 

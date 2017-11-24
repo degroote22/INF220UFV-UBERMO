@@ -54,6 +54,12 @@ export default (
 ) => {
   validateBody(req.body);
 
+  const body: RequestBody = req.body;
+  const { tipoCobranca } = body;
+  if (tipoCobranca === 0) {
+    //hora
+  }
+
   const response: Response = { id: 1 };
 
   res.json(response);

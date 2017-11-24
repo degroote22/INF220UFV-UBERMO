@@ -4,6 +4,9 @@ import { validaEmail } from "../shared/email";
 import { validaSenha } from "../shared/senha";
 import { LoginResponse } from "../shared/login";
 import * as pgPromise from "pg-promise";
+import { jwtResponse } from "../shared/jwt";
+import * as jwt from "jsonwebtoken";
+import secret from "../shared/secret";
 
 interface ContaBancaria {
   nomebanco: string;
@@ -95,9 +98,13 @@ export default (
         )
     )
     .then(() => {
+      const jwtr: jwtResponse = {
+        email: body.email,
+        role: "prestador"
+      };
       const response: LoginResponse = {
         nome: body.nome,
-        jwt: "abc"
+        jwt: jwt.sign(jwtr, secret, { expiresIn: "1h" })
       };
       res.json(response);
     })

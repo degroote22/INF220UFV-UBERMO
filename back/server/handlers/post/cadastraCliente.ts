@@ -4,8 +4,9 @@ import { validaEmail } from "../shared/email";
 import { validaSenha } from "../shared/senha";
 import { LoginResponse } from "../shared/login";
 import * as pgPromise from "pg-promise";
-
-// import * as jwt from "jsonwebtoken";
+import { jwtResponse } from "../shared/jwt";
+import * as jwt from "jsonwebtoken";
+import secret from "../shared/secret";
 
 // {
 // 	"nome": "aaaaaaaaaaa",
@@ -42,7 +43,7 @@ interface RequestBody {
   senha: string;
   cartao: CartaoCredito;
   endereco: Endereco;
-  email: String;
+  email: string;
 }
 
 const validateBody = (body: RequestBody) => {
@@ -129,9 +130,13 @@ export default (
         )
     )
     .then(() => {
+      const jwtr: jwtResponse = {
+        email: body.email,
+        role: "cliente"
+      };
       const response: LoginResponse = {
         nome: body.nome,
-        jwt: "abc"
+        jwt: jwt.sign(jwtr, secret, { expiresIn: "1h" })
       };
       res.json(response);
     })

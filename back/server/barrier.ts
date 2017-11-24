@@ -22,16 +22,15 @@ const barrier = (kind: string) => (
   } catch (err) {
     throw Error("jwtexpired");
   }
-  const error = decoded.role !== kind;
 
-  if (error) {
-    let err: any = new Error("Autenticação inválida");
-    err.status = 401;
-    next(err);
-  } else {
+  if (decoded.role === kind) {
     res.locals.role = kind;
     res.locals.email = decoded.email;
     next();
+  } else {
+    let err: any = new Error("Autenticação inválida");
+    err.status = 401;
+    next(err);
   }
 };
 
