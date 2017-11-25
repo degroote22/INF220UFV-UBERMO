@@ -1,0 +1,4 @@
+[ ] notificação de erro genérica
+[ ] servicosporcliente
+[ ] registro do cliente
+[ ] finanças do cliente

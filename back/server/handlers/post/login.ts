@@ -7,7 +7,7 @@ import { jwtResponse } from "../shared/jwt";
 import * as pgPromise from "pg-promise";
 import * as jwt from "jsonwebtoken";
 
-interface RequestBody {
+export interface RequestBody {
   email: string;
   senha: string;
 }
@@ -23,6 +23,7 @@ export default (kind: string) => (
   res: express.Response,
   next: express.NextFunction
 ) => {
+  console.log(req.body);
   validateBody(req.body);
 
   const db: pgPromise.IDatabase<{}> = res.locals.db;

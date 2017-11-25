@@ -1,75 +1,58 @@
 import * as express from "express";
 import * as pgPromise from "pg-promise";
 
-interface QueryBody {
-  cliente: number;
-}
-
-interface QueryRawBody {
+interface Query {
   cliente: string;
 }
 
-interface ServicoContratado {
-  nome: string;
-  dataConclusao: string;
-  tipoCobranca: number;
-  valorDiaria?: number;
-  valorHora?: number;
-  valorAtividade?: number;
-  quantidadeHoras?: number;
-  quantidadeDias?: number;
-}
-
 interface Response {
-  servicos: ServicoContratado[];
-
-  recebidoHoje: number;
-  recebidoMes: number;
-  recebidoAno: number;
+  hoje: number;
+  semana: number;
+  mes: number;
+  ano: number;
 }
 
-const validateParseQuery = (query: QueryRawBody): QueryBody => {
-  const { cliente } = query;
-  const c = parseInt(cliente, 10);
-  if (isNaN(c)) throw Error("Nao foi informado o cliente");
-  return { cliente: c };
+const validateQuery = (query: Query) => {
+  if (typeof query.cliente !== "string")
+    throw Error("Email de cliente inválido");
 };
 
-export default (
+export default async (
   req: express.Request,
   res: express.Response,
   next: express.NextFunction
 ) => {
-  // pra cada cliente
-  // pegar os servicos q ele contratou
-  // contar quantas contratacoes tem neles
-  // somar as horas
-  // somar as diarias
+  try {
+    validateQuery(req.query);
+    const query: Query = req.query;
 
-  const q = validateParseQuery(req.query);
-  false && console.log(q);
+    const db: pgPromise.IDatabase<{}> = res.locals.db;
 
-  const servicos: ServicoContratado[] = [];
-  const db: pgPromise.IDatabase<{}> = res.locals.db;
+    const getByTime = (days: number) =>
+      db
+        .one(
+          "SELECT SUM(ofertado.valor * contratado.quantidade) as s FROM ubermo.cliente, ubermo.ofertado, ubermo.contratado " +
+            "WHERE cliente.email = $1 AND contratado.cliente = cliente.email AND contratado.servico = ofertado.id " +
+            "AND contratado.datapedido >= NOW() - interval '" +
+            String(days) +
+            " day' ",
+          [query.cliente]
+        )
+        .then(x => x.s);
 
-  db.any(
-    "SELECT COUNT(*) as contratacoes, SUM(contratado.quantidade) as quantidade, " +
-      "ofertado.id, tipo.nome, tipo.tipocobranca, ofertado.valor " +
-      "FROM ubermo.contratado, ubermo.ofertado, ubermo.tipo " +
-      "WHERE contratado.servico = ofertado.id AND ofertado.prestador = $1 AND ofertado.tipo = tipo.id " +
-      "AND contratado.datapedido >= NOW() - interval '" +
-      String(days) +
-      " day' " +
-      "GROUP BY ofertado.id, tipo.nome, tipo.tipocobranca ",
-    [query.prestador]
-  );
+    const hoje = await getByTime(1);
+    const semana = await getByTime(7);
+    const mes = await getByTime(30);
+    const ano = await getByTime(365);
 
-  const response: Response = {
-    servicos,
-    recebidoHoje: 10000,
-    recebidoAno: 150000,
-    recebidoMes: 10000
-  };
-
-  res.json(response);
+    const response: Response = {
+      hoje,
+      semana,
+      mes,
+      ano
+    };
+    res.json(response);
+  } catch (err) {
+    res.locals.handleError(err);
+  }
 };

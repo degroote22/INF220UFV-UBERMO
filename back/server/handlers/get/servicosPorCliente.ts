@@ -1,9 +1,9 @@
 import * as express from "express";
 import * as pgPromise from "pg-promise";
 
-interface Query {
-  email: string;
-}
+// interface Query {
+//   email: string;
+// }
 
 interface ServicoContratado {
   id: number;
@@ -24,9 +24,9 @@ interface Response {
   servicos: ServicoContratado[];
 }
 
-const validateQuery = (query: Query) => {
-  if (typeof query.email !== "string") throw Error("Email de cliente inválido");
-};
+// const validateQuery = (query: Query) => {
+//   if (typeof query.email !== "string") throw Error("Email de cliente inválido");
+// };
 
 export default (
   req: express.Request,
@@ -34,10 +34,10 @@ export default (
   next: express.NextFunction
 ) => {
   // const q = validateParseQuery(req.query);
-  validateQuery(req.query);
-  const query: Query = req.query;
+  // validateQuery(req.query);
+  // const query: Query = req.query;
   const db: pgPromise.IDatabase<{}> = res.locals.db;
-
+  const email = res.locals.email
   db
     .any(
       "SELECT contratado.id as id, tipo.nome, ofertado.valor, contratado.quantidade, " +
@@ -46,7 +46,7 @@ export default (
         "contratado.notaprestador, contratado.comentarioprestador " +
         "FROM ubermo.contratado, ubermo.ofertado, ubermo.tipo " +
         "WHERE contratado.servico = ofertado.id AND contratado.cliente = $1 AND tipo.id = ofertado.tipo",
-      [query.email]
+      [email]
     )
     .then((servicos: ServicoContratado[]) => {
       const response: Response = { servicos };

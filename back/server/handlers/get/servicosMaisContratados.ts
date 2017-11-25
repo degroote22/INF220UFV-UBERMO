@@ -9,13 +9,13 @@ interface QueryRawBody {
   limit: string;
 }
 
-interface TipoServico {
+export interface TipoServico {
   id: number;
   nome: string;
   contratacoes: number;
 }
 
-interface Response {
+export interface Response {
   tipos: TipoServico[];
 }
 

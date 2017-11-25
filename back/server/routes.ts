@@ -18,7 +18,11 @@ router.post("/requisitaservico", barrier("cliente"), handlers.requisitaServico);
 
 // GET
 router.get("/prestadores", handlers.prestadores);
-router.get("/servicosporcliente", handlers.servicosPorCliente);
+router.get(
+  "/servicosporcliente",
+  barrier("cliente"),
+  handlers.servicosPorCliente
+);
 router.get("/clientesmaiscontratacoes", handlers.clientesMaisContratacoes);
 router.get("/servicosmaiscontratados", handlers.servicosMaisContratados);
 router.get("/financacliente", handlers.financaCliente);

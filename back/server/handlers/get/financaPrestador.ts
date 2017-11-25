@@ -36,7 +36,6 @@ export default async (
   try {
     validateQuery(req.query);
     const query: Query = req.query;
-    false && console.log(query);
 
     const db: pgPromise.IDatabase<{}> = res.locals.db;
 

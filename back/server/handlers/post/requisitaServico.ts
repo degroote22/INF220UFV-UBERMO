@@ -1,6 +1,6 @@
 import * as express from "express";
 import * as pgPromise from "pg-promise";
-import { STATUS_INICIAL } from "../shared/status";
+import { PEDIDO } from "../shared/status";
 
 interface RequestBody {
   idservico: number;
@@ -38,7 +38,7 @@ export default async (
       "INSERT INTO ubermo.contratado " +
         "(servico, cliente, quantidade, datapedido, status) " +
         "VALUES ($1, $2, $3, current_timestamp, $4) RETURNING id",
-      [idservico, email, body.quantidade, STATUS_INICIAL]
+      [idservico, email, body.quantidade, PEDIDO]
     );
 
     handleResponse(id);
