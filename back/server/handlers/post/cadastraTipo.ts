@@ -26,7 +26,6 @@ export default (
   next: express.NextFunction
 ) => {
   validateBody(req.body);
-
   const db: pgPromise.IDatabase<{}> = res.locals.db;
 
   const body: RequestBody = req.body;

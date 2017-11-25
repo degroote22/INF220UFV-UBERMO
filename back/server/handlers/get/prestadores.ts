@@ -1,4 +1,6 @@
 import * as express from "express";
+import * as pgPromise from "pg-promise";
+// import { HORA, tipoToValor, DIARIA, ATIVIDADE } from "../shared/tiposCobranca";
 
 interface QueryBody {
   tipo: number;
@@ -9,20 +11,18 @@ interface QueryRawBody {
 }
 
 interface Prestador {
-  id: number;
   nome: string;
   telefone: string;
-  notaAcumulada: number;
+  nota: number;
   email: string;
-  fotoUrl: string;
+  foto: string;
 }
 
 interface ServicoOfertado {
   id: number;
   nome: string;
-  valorDiaria?: number;
-  valorHora?: number;
-  valorAtividade?: number;
+  tipocobranca: number;
+  valor: number;
 }
 
 interface PrestadorServico {
@@ -42,28 +42,51 @@ const validateParseQuery = (query: QueryRawBody): QueryBody => {
   return { tipo: t };
 };
 
-export default (
+export default async (
   req: express.Request,
   res: express.Response,
   next: express.NextFunction
 ) => {
-  const q = validateParseQuery(req.query);
-  false && console.log(q);
+  try {
+    const q = validateParseQuery(req.query);
 
-  const prestadores: PrestadorServico[] = [
-    {
-      prestador: {
-        id: 1,
-        nome: "Joao",
-        telefone: "1234-5678",
-        notaAcumulada: 4.5,
-        email: "aaaaa@bbbb.ccc",
-        fotoUrl: "http://lorempixel.com/400/400"
-      },
-      servico: { id: 1, nome: "Limpeza de sofá", valorHora: 5000 }
-    }
-  ];
+    const db: pgPromise.IDatabase<{}> = res.locals.db;
 
-  const response: Response = { prestadores };
-  res.json(response);
+    const { tipocobranca, nome } = await db.one(
+      "SELECT tipocobranca, nome FROM ubermo.tipo WHERE id = $1",
+      [q.tipo]
+    );
+
+    await db
+      .any(
+        "SELECT ofertado.id, ofertado.valor, " +
+          "prestador.nome, prestador.telefone, prestador.nota, prestador.email, prestador.foto " +
+          "FROM ubermo.ofertado, ubermo.prestador WHERE tipo = $1 " +
+          "and prestador.email = ofertado.prestador ORDER BY ofertado.valor",
+        [q.tipo]
+      )
+      .then(result =>
+        result.map(r => ({
+          servico: {
+            id: r.id,
+            nome,
+            tipocobranca,
+            valor: r.valor
+          },
+          prestador: {
+            nome: r.nome,
+            telefone: r.telefone,
+            nota: r.nota,
+            email: r.email,
+            foto: r.foto
+          }
+        }))
+      )
+      .then((prestadores: PrestadorServico[]) => {
+        const response: Response = { prestadores };
+        res.json(response);
+      });
+  } catch (err) {
+    res.locals.handleError(err);
+  }
 };

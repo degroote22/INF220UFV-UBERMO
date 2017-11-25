@@ -8,6 +8,28 @@ import { jwtResponse } from "../shared/jwt";
 import * as jwt from "jsonwebtoken";
 import secret from "../shared/secret";
 
+// {
+// 	"nome": "aaaaaaaaaaa",
+// 	"telefone": "1234-56777",
+// 	"senha": "lucaslucas",
+// 	"email": "lucaxx@gmail.com",
+// 	"foto": "http://lorempixel.com/400/400/",
+// 	"conta": {
+// 		"nomebanco": "aaaaaaaaaaa",
+// 		"agencia": "55519",
+// 		"conta": "10001"
+// 	},
+// 	"endereco": {
+// 		"uf": "MG",
+// 		"cidade": "Viçosa",
+// 		"bairro": "abc",
+// 		"logradouro": "ahahahha",
+// 		"numero": "222",
+// 		"complemento": "",
+// 		"cep": "35180-240"
+// 	}
+// }
+
 interface ContaBancaria {
   nomebanco: string;
   agencia: string;
@@ -17,11 +39,11 @@ interface ContaBancaria {
 interface RequestBody {
   nome: string;
   telefone: string;
-  foto: string;
-  endereco: Endereco;
   senha: string;
   email: string;
+  endereco: Endereco;
   conta: ContaBancaria;
+  foto: string;
 }
 
 const validaConta = (cb: ContaBancaria) => {
@@ -64,11 +86,14 @@ export default (
   const db: pgPromise.IDatabase<{}> = res.locals.db;
   const body: RequestBody = req.body;
   const { endereco, conta } = body;
+
+  const handleError = res.locals.handleError;
+
   db
     .tx(t =>
       t
         .none(
-          "INSERT INTO UBERMO.PRESTADOR (nome, telefone, nota, foto, email) " +
+          "INSERT INTO UBERMO.PRESTADOR (nome, telefone, nota, foto, email, hash) " +
             "VALUES ($1, $2, $3, $4, $5, crypt($6, gen_salt('bf')))",
           [body.nome, body.telefone, 0, body.foto, body.email, body.senha]
         )
@@ -113,8 +138,7 @@ export default (
         res.status(500);
         res.json({ message: "E-mail já cadastrado" });
       } else {
-        res.status(500);
-        res.json(err);
+        handleError(err);
       }
     });
 };

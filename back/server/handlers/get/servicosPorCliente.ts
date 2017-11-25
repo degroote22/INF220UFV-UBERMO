@@ -1,40 +1,31 @@
 import * as express from "express";
+import * as pgPromise from "pg-promise";
 
-interface QueryBody {
-  cliente: number;
-}
-
-interface QueryRawBody {
-  cliente: string;
+interface Query {
+  email: string;
 }
 
 interface ServicoContratado {
   id: number;
   nome: string;
-  valorDiaria?: number;
-  valorHora?: number;
-  valorAtividade?: number;
-  quantidadeHoras?: number;
-  quantidadeDias?: number;
-  tipoCobranca: number;
-  dataPedido: string;
-  dataConclusao: string;
+  valor: number;
+  quantidade: number;
+  tipocobranca: number;
+  datapedido: string;
+  dataconclusao: string;
   status: number;
-  notaCliente: number;
-  comentarioCliente: string;
-  notaPrestador: number;
-  comentarioPrestador: string;
+  notacliente: number;
+  comentariocliente: string;
+  notaprestador: number;
+  comentarioprestador: string;
 }
 
 interface Response {
   servicos: ServicoContratado[];
 }
 
-const validateParseQuery = (query: QueryRawBody): QueryBody => {
-  const { cliente } = query;
-  const c = parseInt(cliente, 10);
-  if (isNaN(c)) throw Error("Nao foi informado o cliente");
-  return { cliente: c };
+const validateQuery = (query: Query) => {
+  if (typeof query.email !== "string") throw Error("Email de cliente inválido");
 };
 
 export default (
@@ -42,12 +33,24 @@ export default (
   res: express.Response,
   next: express.NextFunction
 ) => {
-  const q = validateParseQuery(req.query);
-  false && console.log(q);
+  // const q = validateParseQuery(req.query);
+  validateQuery(req.query);
+  const query: Query = req.query;
+  const db: pgPromise.IDatabase<{}> = res.locals.db;
 
-  const servicos: ServicoContratado[] = [];
-
-  const response: Response = { servicos };
-
-  res.json(response);
+  db
+    .any(
+      "SELECT contratado.id as id, tipo.nome, ofertado.valor, contratado.quantidade, " +
+        "tipo.tipocobranca, contratado.datapedido, contratado.dataconclusao, contratado.status, " +
+        "contratado.notacliente, contratado.comentariocliente, " +
+        "contratado.notaprestador, contratado.comentarioprestador " +
+        "FROM ubermo.contratado, ubermo.ofertado, ubermo.tipo " +
+        "WHERE contratado.servico = ofertado.id AND contratado.cliente = $1 AND tipo.id = ofertado.tipo",
+      [query.email]
+    )
+    .then((servicos: ServicoContratado[]) => {
+      const response: Response = { servicos };
+      res.json(response);
+    })
+    .catch(res.locals.handleError);
 };

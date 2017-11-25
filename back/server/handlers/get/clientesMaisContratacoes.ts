@@ -1,4 +1,5 @@
 import * as express from "express";
+import * as pgPromise from "pg-promise";
 
 interface QueryBody {
   tipo: number;
@@ -9,11 +10,9 @@ interface QueryRawBody {
 }
 
 interface Cliente {
-  id: number;
+  email: number;
   nome: string;
-  telefone: string;
-  notaAcumulada: number;
-  email: string;
+  contratacoes: number;
 }
 
 interface Response {
@@ -23,7 +22,7 @@ interface Response {
 const validateParseQuery = (query: QueryRawBody): QueryBody => {
   const { tipo } = query;
   const t = parseInt(tipo, 10);
-  if (isNaN(t)) throw Error("Nao foi informado o tipo do servico dos clientes");
+  if (isNaN(t)) throw Error("Nao foi informado o tipo do serviço dos clientes");
   return { tipo: t };
 };
 
@@ -32,20 +31,19 @@ export default (
   res: express.Response,
   next: express.NextFunction
 ) => {
+  const db: pgPromise.IDatabase<{}> = res.locals.db;
   const q = validateParseQuery(req.query);
-  false && console.log(q);
 
-  const clientes: Cliente[] = [
-    {
-      id: 1,
-      nome: "Daniel",
-      telefone: "1234-5678",
-      notaAcumulada: 4.5,
-      email: "aaaaa@bbbb.ccc"
-    }
-  ];
-
-  const response: Response = { clientes };
-
-  res.json(response);
+  db
+    .any(
+      "SELECT COUNT(*) as contratacoes, cliente.nome, cliente.email FROM ubermo.contratado, ubermo.ofertado, ubermo.cliente " +
+        "WHERE contratado.servico = ofertado.id AND ofertado.tipo = $1 AND contratado.cliente = cliente.email " +
+        "GROUP BY cliente.email",
+      [q.tipo]
+    )
+    .then((clientes: Cliente[]) => {
+      const response: Response = { clientes };
+      res.json(response);
+    })
+    .catch(res.locals.handleError);
 };

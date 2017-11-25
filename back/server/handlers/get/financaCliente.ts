@@ -1,4 +1,5 @@
 import * as express from "express";
+import * as pgPromise from "pg-promise";
 
 interface QueryBody {
   cliente: number;
@@ -39,10 +40,29 @@ export default (
   res: express.Response,
   next: express.NextFunction
 ) => {
+  // pra cada cliente
+  // pegar os servicos q ele contratou
+  // contar quantas contratacoes tem neles
+  // somar as horas
+  // somar as diarias
+
   const q = validateParseQuery(req.query);
   false && console.log(q);
 
   const servicos: ServicoContratado[] = [];
+  const db: pgPromise.IDatabase<{}> = res.locals.db;
+
+  db.any(
+    "SELECT COUNT(*) as contratacoes, SUM(contratado.quantidade) as quantidade, " +
+      "ofertado.id, tipo.nome, tipo.tipocobranca, ofertado.valor " +
+      "FROM ubermo.contratado, ubermo.ofertado, ubermo.tipo " +
+      "WHERE contratado.servico = ofertado.id AND ofertado.prestador = $1 AND ofertado.tipo = tipo.id " +
+      "AND contratado.datapedido >= NOW() - interval '" +
+      String(days) +
+      " day' " +
+      "GROUP BY ofertado.id, tipo.nome, tipo.tipocobranca ",
+    [query.prestador]
+  );
 
   const response: Response = {
     servicos,

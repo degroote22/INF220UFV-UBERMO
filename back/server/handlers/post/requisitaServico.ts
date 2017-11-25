@@ -1,28 +1,48 @@
 import * as express from "express";
+import * as pgPromise from "pg-promise";
+import { STATUS_INICIAL } from "../shared/status";
 
 interface RequestBody {
-  idServico: String;
-  quantidadeHoras: Number;
-  quantidadeDiarias: Number;
+  idservico: number;
+  quantidade: number;
 }
 
 interface Response {
-  idContrato: Number;
+  id: number;
 }
 
 const validateBody = (body: RequestBody) => {
-  const { idServico } = body;
-  if (typeof idServico !== "string") throw Error("Serviço inválido");
+  const { idservico } = body;
+  if (typeof idservico !== "number") throw Error("Serviço inválido");
 };
 
-export default (
+export default async (
   req: express.Request,
   res: express.Response,
   next: express.NextFunction
 ) => {
-  validateBody(req.body);
+  try {
+    validateBody(req.body);
 
-  const response: Response = { idContrato: 1 };
+    const body: RequestBody = req.body;
+    const db: pgPromise.IDatabase<{}> = res.locals.db;
+    const email = res.locals.email;
 
-  res.json(response);
+    const { idservico } = body;
+    const handleResponse = (id: number) => {
+      const response: Response = { id };
+      res.json(response);
+    };
+
+    const { id } = await db.one(
+      "INSERT INTO ubermo.contratado " +
+        "(servico, cliente, quantidade, datapedido, status) " +
+        "VALUES ($1, $2, $3, current_timestamp, $4) RETURNING id",
+      [idservico, email, body.quantidade, STATUS_INICIAL]
+    );
+
+    handleResponse(id);
+  } catch (err) {
+    res.locals.handleError(err);
+  }
 };

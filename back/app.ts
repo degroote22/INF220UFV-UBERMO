@@ -42,6 +42,12 @@ app.use(bodyParser.json());
 app.use(
   "/",
   (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    const handleError = (err: Error) => {
+      res.status(500);
+      console.log(err);
+      res.json({ message: err.message });
+    };
+    res.locals.handleError = handleError;
     res.locals.db = db;
     next();
   }
