@@ -49,6 +49,7 @@ export default (
     )
     .then((tipos: TipoServico[]) => {
       const response: Response = { tipos };
+      console.log(response);
       res.json(response);
     })
     .catch(res.locals.handleError);

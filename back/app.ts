@@ -34,7 +34,8 @@ app.use(
     };
     res.locals.handleError = handleError;
     res.locals.db = db;
-    next();
+    setTimeout(next, 300);
+    // next();
   }
 );
 

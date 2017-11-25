@@ -30,13 +30,13 @@ import secret from "../shared/secret";
 // 	}
 // }
 
-interface ContaBancaria {
+export interface ContaBancaria {
   nomebanco: string;
   agencia: string;
   conta: string;
 }
 
-interface RequestBody {
+export interface RequestBody {
   nome: string;
   telefone: string;
   senha: string;

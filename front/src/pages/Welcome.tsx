@@ -1,6 +1,7 @@
 import * as React from "react";
 import { CLIENTE, PRESTADOR } from "../roles";
-
+import * as rtr from "react-router-dom";
+const { Link } = rtr;
 const cn = (ns: string[]) => ns.join(" ");
 
 class Layout extends React.Component<
@@ -144,13 +145,15 @@ class Layout extends React.Component<
 
   renderRegisterButton = () => (
     <div className="field">
-      <button
-        className="button is-fullwidth is-success"
-        disabled={this.props.loginLoading}
-        onClick={this.onRegisterClick}
-      >
-        Registrar
-      </button>
+      <Link to="/registrar">
+        <button
+          className="button is-fullwidth is-success"
+          disabled={this.props.loginLoading}
+          onClick={this.onRegisterClick}
+        >
+          Registrar
+        </button>
+      </Link>
     </div>
   );
 

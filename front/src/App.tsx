@@ -1,6 +1,11 @@
 import * as React from "react";
-import Welcome from "./dumb/Welcome";
-import { loginCliente, loginPrestador } from "./http";
+import pages from "./pages";
+import {
+  loginCliente,
+  loginPrestador,
+  cadastraCliente,
+  cadastraPrestador
+} from "./http";
 import { CLIENTE, DESLOGADO, PRESTADOR } from "./roles";
 import * as rtr from "react-router-dom";
 import {
@@ -8,20 +13,8 @@ import {
   clearLocalStorage,
   setLocalStorage
 } from "./localStorage";
-import Cliente from "./dumb/Cliente";
 const { BrowserRouter, Route, Redirect, Switch } = rtr;
 
-class NoMatch extends React.Component<{}, { redirect: boolean }> {
-  state = { redirect: false };
-  redirect = () => this.setState({ redirect: true });
-  componentDidMount() {
-    if (!this.state.redirect) setTimeout(this.redirect, 1000);
-  }
-  render() {
-    if (this.state.redirect) return <Redirect to="/" />;
-    return <div>Página não encontrada, voltando à home...</div>;
-  }
-}
 interface State {
   loginLoading: boolean;
   notification: boolean;
@@ -29,15 +22,19 @@ interface State {
   nome: string;
   jwt: string;
   role: string;
+  registerLoading: boolean;
 }
+
 const initialState: State = {
   loginLoading: false,
+  registerLoading: false,
   notification: false,
   notificationText: "",
   nome: "",
   jwt: "",
   role: DESLOGADO
 };
+
 class App extends React.Component<{}, State> {
   state = initialState;
 
@@ -50,9 +47,37 @@ class App extends React.Component<{}, State> {
     }
   }
 
-  onLogoutClick = () => {
+  handleHttpError = (error: any) => {
+    if (error.message === "jwtexpired") {
+      this.logout();
+    } else {
+      this.setNotification(error.message);
+    }
+  };
+
+  logout = () => {
     this.setState(initialState);
     clearLocalStorage();
+  };
+
+  setNotification = (msg: string) =>
+    typeof msg === "string"
+      ? this.setState({
+          notification: true,
+          notificationText: msg
+        })
+      : this.setState({
+          notification: true,
+          notificationText: JSON.stringify(msg)
+        });
+
+  login = (jwt: string, nome: string, role: string) => {
+    this.setState({ jwt, nome, role });
+    setLocalStorage(jwt, nome, role);
+  };
+
+  onLogoutClick = () => {
+    this.logout();
   };
 
   onLoginClick = (email: string, senha: string, role: string) => {
@@ -64,14 +89,12 @@ class App extends React.Component<{}, State> {
     fn()
       .then(r => {
         this.setState({ loginLoading: false });
-        this.setState({ jwt: r.jwt, nome: r.nome, role });
-        setLocalStorage(r.jwt, r.nome, role);
+        this.login(r.jwt, r.nome, role);
       })
       .catch(err => {
+        this.setNotification("Erro no login. Confira e-mail e senha.");
         this.setState({
-          loginLoading: false,
-          notification: true,
-          notificationText: "Erro no login. Confira e-mail e senha."
+          loginLoading: false
         });
       });
   };
@@ -87,7 +110,7 @@ class App extends React.Component<{}, State> {
       if (role === PRESTADOR) return <Redirect to="/prestador" />;
     }
     return (
-      <Welcome
+      <pages.Welcome
         key="welcome"
         onLoginClick={this.onLoginClick}
         loginLoading={this.state.loginLoading}
@@ -95,15 +118,18 @@ class App extends React.Component<{}, State> {
     );
   };
 
-  renderCliente = () => {
+  renderCliente = (router: any) => {
     const { role } = this.state;
-    if (role === DESLOGADO) return <Redirect to="/" />;
+    if (role !== CLIENTE) return <Redirect to="/" />;
 
     return (
-      <Cliente
+      <pages.Cliente
         key="cliente"
         nome={this.state.nome}
         onLogoutClick={this.onLogoutClick}
+        jwt={this.state.jwt}
+        handleHttpError={this.handleHttpError}
+        pathname={router.location.pathname}
       />
     );
   };
@@ -116,6 +142,47 @@ class App extends React.Component<{}, State> {
       </section>
     </footer>
   );
+
+  cadastraCliente = (payload: any) => {
+    this.setState({ registerLoading: true });
+    cadastraCliente(payload)
+      .then(r => {
+        this.setState({ registerLoading: false });
+        this.login(r.jwt, r.nome, CLIENTE);
+      })
+      .catch(err => {
+        this.setNotification(err.message);
+        this.setState({ registerLoading: false });
+      });
+  };
+
+  cadastraPrestador = (payload: any) => {
+    this.setState({ registerLoading: true });
+    cadastraPrestador(payload)
+      .then(r => {
+        this.setState({ registerLoading: false });
+        this.login(r.jwt, r.nome, PRESTADOR);
+      })
+      .catch(err => {
+        this.setState({ registerLoading: false });
+        this.setNotification(err);
+      });
+  };
+
+  renderRegistrar = () => {
+    const { role } = this.state;
+    if (role !== DESLOGADO) {
+      if (role === CLIENTE) return <Redirect to="/cliente" />;
+      if (role === PRESTADOR) return <Redirect to="/prestador" />;
+    }
+    return (
+      <pages.Registrar
+        loading={this.state.registerLoading}
+        cadastraCliente={this.cadastraCliente}
+        cadastraPrestador={this.cadastraPrestador}
+      />
+    );
+  };
 
   render() {
     const modalCN = ["modal", this.state.notification ? "is-active" : ""].join(
@@ -140,8 +207,9 @@ class App extends React.Component<{}, State> {
           <div className="footerFix" key="site">
             <Switch>
               <Route exact path="/" component={this.renderWelcome} />
-              <Route exact path="/cliente" component={this.renderCliente} />
-              <Route component={NoMatch} />
+              <Route exact path="/registrar" component={this.renderRegistrar} />
+              <Route path="/cliente" component={this.renderCliente} />
+              <Route component={pages.NoMatch} />
             </Switch>
           </div>
           {this.renderFooter()}

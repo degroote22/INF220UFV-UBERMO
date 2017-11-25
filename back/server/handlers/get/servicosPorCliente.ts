@@ -5,7 +5,7 @@ import * as pgPromise from "pg-promise";
 //   email: string;
 // }
 
-interface ServicoContratado {
+export interface ServicoContratado {
   id: number;
   nome: string;
   valor: number;
@@ -20,7 +20,7 @@ interface ServicoContratado {
   comentarioprestador: string;
 }
 
-interface Response {
+export interface Response {
   servicos: ServicoContratado[];
 }
 
@@ -37,7 +37,7 @@ export default (
   // validateQuery(req.query);
   // const query: Query = req.query;
   const db: pgPromise.IDatabase<{}> = res.locals.db;
-  const email = res.locals.email
+  const email = res.locals.email;
   db
     .any(
       "SELECT contratado.id as id, tipo.nome, ofertado.valor, contratado.quantidade, " +

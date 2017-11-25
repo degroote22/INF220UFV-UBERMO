@@ -8,36 +8,14 @@ import { jwtResponse } from "../shared/jwt";
 import * as jwt from "jsonwebtoken";
 import secret from "../shared/secret";
 
-// {
-// 	"nome": "aaaaaaaaaaa",
-// 	"telefone": "1234-56777",
-// 	"senha": "abcbcbcbc",
-// 	"email": "asdasdasdasdasdasd",
-// 	"cartao": {
-// 		"nome": "aaaaaaaaaaa",
-// 		"numero": "89423234234234234",
-// 		"anovencimento": 19,
-// 		"mesvencimento": 11
-// 	},
-// 	"endereco": {
-// 		"uf": "MG",
-// 		"cidade": "Viçosa",
-// 		"bairro": "abc",
-// 		"logradouro": "ahahahha",
-// 		"numero": "222",
-// 		"complemento": "",
-// 		"cep": "35180-240"
-// 	}
-// }
-
-interface CartaoCredito {
+export interface CartaoCredito {
   nome: string;
   numero: string;
   mesvencimento: number;
   anovencimento: number;
 }
 
-interface RequestBody {
+export interface RequestBody {
   nome: string;
   telefone: string;
   senha: string;
