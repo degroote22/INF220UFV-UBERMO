@@ -12,7 +12,7 @@ log.log = console.log.bind(console);
 /**
  * Get port from environment and store in Express.
  */
-let PORT = process.env.PORT || "3000";
+let PORT = process.env.PORT || "8080";
 
 // function getPort(val: any) {
 //   /**

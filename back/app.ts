@@ -11,15 +11,30 @@ import * as pgPromise from "pg-promise";
 const app = express();
 
 const pgp = pgPromise();
-const cn = {
-  host: "localhost",
-  port: 5432,
-  database: "ubermo",
-  user: "ubermo",
-  password: "ubermo"
+let config: any = {
+  user: process.env.SQL_USER,
+  password: process.env.SQL_PASSWORD,
+  database: process.env.SQL_DATABASE
 };
 
-const db = pgp(cn);
+if (
+  process.env.INSTANCE_CONNECTION_NAME &&
+  process.env.NODE_ENV === "production"
+) {
+  config.host = `/cloudsql/${process.env.INSTANCE_CONNECTION_NAME}`;
+}
+if (process.env.NODE_ENV === "development") {
+  const cn = {
+    host: "localhost",
+    port: 5432,
+    database: "ubermo",
+    user: "ubermo",
+    password: "ubermo"
+  };
+  config = cn;
+}
+
+const db = pgp(config);
 app.use(logger("dev"));
 app.use(bodyParser.json());
 app.use(cors());

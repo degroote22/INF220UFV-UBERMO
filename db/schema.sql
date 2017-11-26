@@ -1,5 +1,6 @@
 -- Limpar o schema antes de começar a escrever de novo.
 drop schema ubermo cascade;
+create extension if not exists "pgcrypto";
 
 create schema ubermo;
 comment on schema ubermo is 'O schema da empresa Ubermo';
