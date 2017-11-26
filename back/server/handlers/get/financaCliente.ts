@@ -1,21 +1,12 @@
 import * as express from "express";
 import * as pgPromise from "pg-promise";
 
-interface Query {
-  cliente: string;
-}
-
-interface Response {
+export interface Response {
   hoje: number;
   semana: number;
   mes: number;
   ano: number;
 }
-
-const validateQuery = (query: Query) => {
-  if (typeof query.cliente !== "string")
-    throw Error("Email de cliente inválido");
-};
 
 export default async (
   req: express.Request,
@@ -23,10 +14,8 @@ export default async (
   next: express.NextFunction
 ) => {
   try {
-    validateQuery(req.query);
-    const query: Query = req.query;
-
     const db: pgPromise.IDatabase<{}> = res.locals.db;
+    const email = res.locals.email;
 
     const getByTime = (days: number) =>
       db
@@ -36,7 +25,7 @@ export default async (
             "AND contratado.datapedido >= NOW() - interval '" +
             String(days) +
             " day' ",
-          [query.cliente]
+          [email]
         )
         .then(x => x.s);
 

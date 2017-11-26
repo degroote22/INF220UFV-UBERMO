@@ -2,12 +2,12 @@ import * as express from "express";
 import * as pgPromise from "pg-promise";
 import { PEDIDO } from "../shared/status";
 
-interface RequestBody {
+export interface RequestBody {
   idservico: number;
   quantidade: number;
 }
 
-interface Response {
+export interface Response {
   id: number;
 }
 

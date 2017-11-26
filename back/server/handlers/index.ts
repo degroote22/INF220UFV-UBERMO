@@ -10,6 +10,9 @@ import clientesMaisContratacoes from "./get/clientesMaisContratacoes";
 import servicosMaisContratados from "./get/servicosMaisContratados";
 import financaCliente from "./get/financaCliente";
 import financaPrestador from "./get/financaPrestador";
+import tipos from "./get/tipos";
+import servicosPorTipo from "./get/servicosPorTipo";
+import servico from "./get/servico";
 
 export default {
   cadastraCliente,
@@ -25,5 +28,8 @@ export default {
   clientesMaisContratacoes,
   servicosMaisContratados,
   financaCliente,
-  financaPrestador
+  financaPrestador,
+  tipos,
+  servicosPorTipo,
+  servico
 };
