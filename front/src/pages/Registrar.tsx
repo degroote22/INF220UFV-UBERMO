@@ -213,7 +213,7 @@ class Registrar extends React.Component<
                   value={data.telefone}
                   onChange={this.onChangeTelefone}
                   disabled={disabled}
-                  type="number"
+                  type="tel"
                 />
 
                 <TextInput

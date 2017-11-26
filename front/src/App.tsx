@@ -110,7 +110,6 @@ class App extends React.Component<{}, State> {
   renderWelcome = () => {
     const { role } = this.state;
     if (role !== DESLOGADO) {
-      console.log("sou eu");
       if (role === CLIENTE) return <Redirect to="/cliente" />;
       if (role === PRESTADOR) return <Redirect to="/prestador" />;
     }

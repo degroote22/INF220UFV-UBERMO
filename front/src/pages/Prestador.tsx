@@ -1,6 +1,9 @@
 import * as React from "react";
 import * as Router from "react-router-dom";
 import Gerenciar from "./Gerenciar";
+import FinancaPrestador from "./FinancaPrestador";
+import OfertarServico from "./OfertarServico";
+import Servico from "./Servico";
 
 class Prestador extends React.Component<
   {
@@ -87,15 +90,31 @@ class Prestador extends React.Component<
     </section>
   );
 
-  renderGerenciar = (props: any) => (
+  renderGerenciar = () => (
     <Gerenciar
+      jwt={this.props.jwt}
+      handleHttpError={this.props.handleHttpError}
+    />
+  );
+  renderDados = () => (
+    <FinancaPrestador
+      jwt={this.props.jwt}
+      handleHttpError={this.props.handleHttpError}
+    />
+  );
+  renderCriar = () => (
+    <OfertarServico
+      jwt={this.props.jwt}
+      handleHttpError={this.props.handleHttpError}
+    />
+  );
+  renderServico = (props: any) => (
+    <Servico
       {...props}
       jwt={this.props.jwt}
       handleHttpError={this.props.handleHttpError}
     />
   );
-  renderDados = () => <div />;
-  renderCriar = () => <div />;
 
   render() {
     return [
@@ -115,6 +134,11 @@ class Prestador extends React.Component<
         path="/prestador/criar"
         render={this.renderCriar}
         key="tipos"
+      />,
+      <Router.Route
+        path="/prestador/servico/:id"
+        render={this.renderServico}
+        key="servico"
       />
     ];
   }

@@ -2,11 +2,11 @@ import * as express from "express";
 import * as pgPromise from "pg-promise";
 // import { HORA, DIARIA, ATIVIDADE } from "../shared/tiposCobranca";
 
-interface Query {
-  prestador: string;
-}
+// interface Query {
+//   prestador: string;
+// }
 
-interface Report {
+export interface Report {
   contratacoes: number;
   id: number;
   nome: string;
@@ -15,7 +15,7 @@ interface Report {
   quantidade: number;
 }
 
-interface Response {
+export interface Response {
   // servicos: ServicoContratado[];
   hoje: Report[];
   semana: Report[];
@@ -23,40 +23,27 @@ interface Response {
   ano: Report[];
 }
 
-const validateQuery = (query: Query) => {
-  if (typeof query.prestador !== "string")
-    throw Error("Email de cliente inválido");
-};
-
 export default async (
   req: express.Request,
   res: express.Response,
   next: express.NextFunction
 ) => {
   try {
-    validateQuery(req.query);
-    const query: Query = req.query;
+    const email = res.locals.email;
 
     const db: pgPromise.IDatabase<{}> = res.locals.db;
-
-    // pra cada prestador
-    // pegar os servicos q ele tem oferecido
-    // contar quantas contratacoes tem neles
-    // somar as horas
-    // somar as diarias
 
     const getByTime = (days: number) =>
       db
         .any(
-          "SELECT COUNT(*) as contratacoes, SUM(contratado.quantidade) as quantidade, " +
-            "ofertado.id, tipo.nome, tipo.tipocobranca, ofertado.valor " +
-            "FROM ubermo.contratado, ubermo.ofertado, ubermo.tipo " +
-            "WHERE contratado.servico = ofertado.id AND ofertado.prestador = $1 AND ofertado.tipo = tipo.id " +
-            "AND contratado.datapedido >= NOW() - interval '" +
-            String(days) +
-            " day' " +
-            "GROUP BY ofertado.id, tipo.nome, tipo.tipocobranca ",
-          [query.prestador]
+          `SELECT COUNT(*) as contratacoes, SUM(contratado.quantidade) as quantidade, 
+          ofertado.id, tipo.nome, tipo.tipocobranca, ofertado.valor 
+          FROM ubermo.contratado, ubermo.ofertado, ubermo.tipo
+          WHERE contratado.servico = ofertado.id AND ofertado.prestador = $1 AND ofertado.tipo = tipo.id 
+          AND contratado.datapedido >= NOW() - interval '${String(days)} day' 
+          GROUP BY ofertado.id, tipo.nome, tipo.tipocobranca 
+          `,
+          [email]
         )
         .then((r: any[]): Report[] =>
           r.map((response: any): Report => ({

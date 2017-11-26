@@ -18,13 +18,24 @@ const initialData = {
   fotoprestador: ""
 };
 
-const initialState = {
+interface State {
+  data: Response;
+  loaded: boolean;
+  contratar: boolean;
+  quantidade: number;
+  requisitado: number;
+  loadingContrato: boolean;
+  cliente: boolean;
+}
+
+const initialState: State = {
   data: initialData,
   loaded: false,
   contratar: false,
   quantidade: 1,
   loadingContrato: false,
-  requisitado: 0
+  requisitado: 0,
+  cliente: false
 };
 
 const tempoCobranca = ["(horas)", "(dias)", ""];
@@ -33,21 +44,15 @@ class Servico extends React.Component<
     handleHttpError: (error: any) => void;
     jwt: string;
   },
-  {
-    data: Response;
-    loaded: boolean;
-    contratar: boolean;
-    quantidade: number;
-    requisitado: number;
-    loadingContrato: boolean;
-  }
+  State
 > {
   state = initialState;
   componentDidMount() {
     const id = parseInt((this.props as any).match.params.id, 10);
+    const cliente = (this.props as any).match.url.substring(1, 8) === "cliente";
     servico(id)
       .then((response: Response) => {
-        this.setState({ data: response, loaded: true });
+        this.setState({ data: response, loaded: true, cliente });
       })
       .catch(err => {
         this.props.handleHttpError(err);
@@ -77,7 +82,7 @@ class Servico extends React.Component<
       });
   };
 
-  renderContratar = () => (
+  renderContratarFields = () => (
     <nav className="level">
       <div className="level-left">
         <div className="level-item">
@@ -156,20 +161,21 @@ class Servico extends React.Component<
             nomeprestador={this.state.data.nomeprestador}
             notaprestador={this.state.data.notaprestador}
           />
-
           <hr />
-          <div className="box is-shadowless">
-            {this.state.contratar ? (
-              this.renderContratar()
-            ) : (
-              <button
-                className="button is-success is-large is-outlined is-fullwidth"
-                onClick={this.openContratar}
-              >
-                CONTRATAR SERVIÇO
-              </button>
-            )}
-          </div>
+          {this.state.cliente && (
+            <div className="box is-shadowless">
+              {this.state.contratar ? (
+                this.renderContratarFields()
+              ) : (
+                <button
+                  className="button is-success is-large is-outlined is-fullwidth"
+                  onClick={this.openContratar}
+                >
+                  CONTRATAR SERVIÇO
+                </button>
+              )}
+            </div>
+          )}
         </section>
       </div>
     );

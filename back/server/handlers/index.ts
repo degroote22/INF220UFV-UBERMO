@@ -11,12 +11,15 @@ import servicosMaisContratados from "./get/servicosMaisContratados";
 import financaCliente from "./get/financaCliente";
 import financaPrestador from "./get/financaPrestador";
 import tipos from "./get/tipos";
+import tiposOfertados from "./get/tiposOfertados";
 import servicosPorTipo from "./get/servicosPorTipo";
 import servico from "./get/servico";
 import contrato from "./get/contrato";
 import ofertasPorPrestador from "./get/ofertasPorPrestador";
 import servicosPorPrestador from "./get/servicosPorPrestador";
 import aceitaServico from "./post/aceitaServico";
+import finalizaServico from "./post/finalizaServico";
+import clienteAvalia from "./post/clienteAvalia";
 
 export default {
   cadastraCliente,
@@ -39,5 +42,8 @@ export default {
   contrato,
   servicosPorPrestador,
   ofertasPorPrestador,
-  aceitaServico
+  aceitaServico,
+  finalizaServico,
+  clienteAvalia,
+  tiposOfertados
 };

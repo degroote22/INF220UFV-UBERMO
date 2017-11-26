@@ -1,14 +1,14 @@
 import * as express from "express";
 import * as pgPromise from "pg-promise";
 
-export interface ITipo {
+export interface TipoOfertas {
   id: number;
   nome: string;
-  tipocobranca: number;
+  ofertados: number;
 }
 
 export interface Response {
-  tipos: ITipo[];
+  tipos: TipoOfertas[];
 }
 
 export default (
@@ -19,8 +19,11 @@ export default (
   const db: pgPromise.IDatabase<{}> = res.locals.db;
 
   return db
-    .any("SELECT tipo.id, tipo.nome, tipo.tipocobranca FROM ubermo.tipo")
-    .then((tipos: ITipo[]) => {
+    .any(
+      "SELECT COUNT(*) as ofertados, tipo.id, tipo.nome FROM ubermo.tipo, ubermo.ofertado " +
+        "WHERE ofertado.tipo = tipo.id GROUP BY tipo.id"
+    )
+    .then((tipos: TipoOfertas[]) => {
       const response: Response = { tipos };
       res.json(response);
     })

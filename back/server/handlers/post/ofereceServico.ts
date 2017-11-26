@@ -1,16 +1,16 @@
 import * as express from "express";
 import * as pgPromise from "pg-promise";
 
-interface RequestBody {
-  descricao: String;
-  lat: Number;
-  lng: Number;
+export interface RequestBody {
+  descricao: string;
+  lat: number;
+  lng: number;
   valor: number;
   tipo: number;
 }
 
-interface Response {
-  id: Number;
+export interface Response {
+  id: number;
 }
 
 const validateBody = (body: RequestBody) => {
@@ -83,7 +83,7 @@ function validateArgs(r: any[], tipo: number, nota: any) {
   }
   if (ct && nota < 4.5 && ct >= 3) {
     throw Error("Usuario limitado a 3 servicos");
-  } else if (ct && nota >= 4.5 && ct >= 10) {
+  } else if (ct && nota >= 4.5 && ct >= 5) {
     throw Error("Usuario limitado a 5 servicos");
   }
 }

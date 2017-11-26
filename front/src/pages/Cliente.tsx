@@ -2,18 +2,34 @@ import * as React from "react";
 import {
   servicosMaisContratados,
   servicosPorCliente,
-  tipos,
-  financaCliente
+  tiposOfertados,
+  financaCliente,
+  clienteAvalia
 } from "../http";
 import { TipoServico } from "../../../back/server/handlers/get/servicosMaisContratados";
 import { ServicoContratado } from "../../../back/server/handlers/get/servicosPorCliente";
-import { TipoOfertas } from "../../../back/server/handlers/get/tipos";
+import { TipoOfertas } from "../../../back/server/handlers/get/tiposOfertados";
 import * as Router from "react-router-dom";
 import ServicosPorTipo from "./ServicosPorTipo";
 import Servico from "./Servico";
 import Contrato from "./Contrato";
 import { Response as FincancaResponse } from "../../../back/server/handlers/get/financaCliente";
 import statusMap from "./statusMap";
+import timeago from "../timeago";
+const cobrancaMap2 = ["horas", "dias", "unidade"];
+
+export interface ModalServico {
+  id: number;
+  valor: number;
+  quantidade: number;
+  tipocobranca: number;
+}
+const initialServico: ModalServico = {
+  id: 0,
+  valor: 0,
+  quantidade: 0,
+  tipocobranca: 0
+};
 
 class Cliente extends React.Component<
   {
@@ -27,6 +43,11 @@ class Cliente extends React.Component<
     porCliente: ServicoContratado[];
     todosTipos: TipoOfertas[];
     financa: FincancaResponse;
+    modal: boolean;
+    modalLoading: boolean;
+    modalServico: ModalServico;
+    notaFinalizar: string;
+    comentarioFinalizar: string;
   }
 > {
   state = {
@@ -38,7 +59,12 @@ class Cliente extends React.Component<
       semana: 0,
       mes: 0,
       ano: 0
-    }
+    },
+    modal: false,
+    modalLoading: false,
+    modalServico: initialServico,
+    notaFinalizar: "1",
+    comentarioFinalizar: ""
   };
 
   refreshData = () => {
@@ -54,7 +80,7 @@ class Cliente extends React.Component<
       .then(response => this.setState({ maisContratados: response.tipos }))
       .catch(this.props.handleHttpError);
 
-    tipos()
+    tiposOfertados()
       .then(response => this.setState({ todosTipos: response.tipos }))
       .catch(this.props.handleHttpError);
   };
@@ -196,12 +222,134 @@ class Cliente extends React.Component<
       </div>
     </div>
   );
-
-  formatDate = (date: string | null): string => {
-    if (date) {
-      return new Date(date).toLocaleString();
+  modalCallback: any;
+  openModal = (s: ModalServico, cb?: any) => {
+    if (cb) {
+      this.modalCallback = cb;
     }
-    return "";
+    this.setState({ modal: true, modalServico: s });
+  };
+
+  closeModal = () => {
+    this.modalCallback = null;
+    this.setState({
+      modal: false,
+      modalLoading: false,
+      modalServico: initialServico
+    });
+  };
+
+  onConfirmaModal = () => {
+    if (!this.state.modal || !this.state.modalServico) {
+      return;
+    }
+    this.setState({ modalLoading: true });
+    clienteAvalia(
+      {
+        id: (this.state.modalServico as any).id,
+        notaprestador: parseInt(this.state.notaFinalizar, 10),
+        comentarioprestador: this.state.comentarioFinalizar
+      },
+      this.props.jwt
+    )
+      .then(({ id }) => {
+        this.setState(state => ({
+          ...state,
+          modalLoading: false,
+          modal: false,
+          modalServico: null,
+          notaFinalizar: 1,
+          comentarioFinalizar: "",
+          porCliente: state.porCliente.map(s => {
+            if (s.id === id) {
+              return {
+                ...s,
+                notaprestador: state.notaFinalizar,
+                comentarioprestador: state.comentarioFinalizar
+              };
+            } else return s;
+          })
+        }));
+        if (this.modalCallback) {
+          this.modalCallback();
+        }
+      })
+      .catch(err => {
+        this.setState({ modalLoading: false });
+        this.props.handleHttpError(err);
+      });
+  };
+  onComentarioChange = (event: any) =>
+    this.setState({ comentarioFinalizar: event.target.value });
+  onNotaChange = (event: any) =>
+    this.setState({ notaFinalizar: event.target.value });
+
+  renderModal = () => {
+    const s: any = this.state.modalServico;
+    if (!s) return null;
+    if (this.state.modal) {
+      return (
+        <div
+          className={["modal", this.state.modal ? "is-active" : ""].join(" ")}
+          key="modal"
+        >
+          <div className="modal-background" onClick={this.closeModal} />
+          <div className="modal-content">
+            <div className="box">
+              <p className="title">{s.nome}</p>
+              <p className="subtitle">
+                {s.quantidade} {cobrancaMap2[s.tipocobranca]} por R${(
+                  s.valor *
+                  s.quantidade /
+                  100
+                ).toFixed(2)}
+              </p>
+              <div className="field" key="senha">
+                <label className="label is-link">Nota</label>
+                <div className="select">
+                  <select
+                    value={this.state.notaFinalizar}
+                    onChange={this.onNotaChange}
+                    disabled={this.state.modalLoading}
+                  >
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                  </select>
+                </div>
+              </div>
+              <div className="field" key="email">
+                <label className="label">Comentário</label>
+                <div className="control">
+                  <textarea
+                    className="textarea is-link"
+                    value={this.state.comentarioFinalizar}
+                    disabled={this.state.modalLoading}
+                    onChange={this.onComentarioChange}
+                  />
+                </div>
+              </div>
+              <hr />
+              <button
+                disabled={this.state.modalLoading}
+                onClick={this.onConfirmaModal}
+                className="button is-success"
+              >
+                CONFIRMAR
+              </button>
+            </div>
+          </div>
+          <button
+            className="modal-close is-large"
+            aria-label="close"
+            onClick={this.closeModal}
+          />
+        </div>
+      );
+    }
+    return null;
   };
 
   tableRow = (s: ServicoContratado) => (
@@ -213,16 +361,26 @@ class Cliente extends React.Component<
       <td>R${(s.valor / 100).toFixed(2)}</td>
       <td>{s.quantidade}</td>
       <td>R${(s.valor * s.quantidade / 100).toFixed(2)}</td>
-      <td>{this.formatDate(s.datapedido)}</td>
-      <td>{this.formatDate(s.dataconclusao)}</td>
+      <td>{timeago(s.datapedido)}</td>
+      <td>{timeago(s.dataconclusao)}</td>
       <td>{s.notacliente}</td>
-      <td>{s.comentariocliente}</td>
       <td>{s.notaprestador}</td>
-      <td>{s.comentarioprestador}</td>
+      <td>
+        {s.status === 2 &&
+          !s.notaprestador && (
+            <button
+              className="button is-link"
+              onClick={() => this.openModal(s)}
+            >
+              AVALIAR
+            </button>
+          )}
+      </td>
     </tr>
   );
 
   renderDados = () => {
+    console.log(this.state.porCliente);
     return (
       <div className="container" key="dados">
         <section className="section">
@@ -257,17 +415,12 @@ class Cliente extends React.Component<
                   <abbr title="Data da Conclusão">DC</abbr>
                 </th>
                 <th>
-                  <abbr title="Nota dada">ND</abbr>
-                </th>
-                <th>
-                  <abbr title="Comentário dado">CD</abbr>
-                </th>
-                <th>
                   <abbr title="Nota recebida">NR</abbr>
                 </th>
                 <th>
-                  <abbr title="Comentário recebido">CR</abbr>
+                  <abbr title="Nota dada">ND</abbr>
                 </th>
+                <th>Ação</th>
               </tr>
             </thead>
             <tbody>{this.state.porCliente.map(this.tableRow)}</tbody>
@@ -283,6 +436,7 @@ class Cliente extends React.Component<
 
   renderServico = (props: any) => (
     <Servico
+      openModal={this.openModal}
       {...props}
       handleHttpError={this.props.handleHttpError}
       jwt={this.props.jwt}
@@ -292,6 +446,7 @@ class Cliente extends React.Component<
   renderContrato = (props: any) => (
     <Contrato
       {...props}
+      openModal={this.openModal}
       handleHttpError={this.props.handleHttpError}
       jwt={this.props.jwt}
     />
@@ -300,6 +455,7 @@ class Cliente extends React.Component<
   render() {
     return [
       this.renderHero(),
+      this.renderModal(),
       <Router.Route
         exact
         path="/cliente"

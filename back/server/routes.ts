@@ -14,6 +14,8 @@ router.post("/loginadmin", handlers.loginAdmin);
 router.post("/ofereceservico", barrier("prestador"), handlers.ofereceServico);
 router.post("/requisitaservico", barrier("cliente"), handlers.requisitaServico);
 router.post("/aceitaservico", barrier("prestador"), handlers.aceitaServico);
+router.post("/finalizaservico", barrier("prestador"), handlers.finalizaServico);
+router.post("/clienteavalia", barrier("cliente"), handlers.clienteAvalia);
 
 // GET
 router.get("/prestadores", handlers.prestadores);
@@ -31,6 +33,7 @@ router.get(
   handlers.financaPrestador
 );
 router.get("/tipos", handlers.tipos);
+router.get("/tiposofertados", handlers.tiposOfertados);
 router.get("/servicosportipo", handlers.servicosPorTipo);
 router.get("/servico", handlers.servico);
 router.get("/contrato", barrier("cliente"), handlers.contrato);

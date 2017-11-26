@@ -45,7 +45,7 @@ export default (
         "contratado.notacliente, contratado.comentariocliente, " +
         "contratado.notaprestador, contratado.comentarioprestador " +
         "FROM ubermo.contratado, ubermo.ofertado, ubermo.tipo " +
-        "WHERE contratado.servico = ofertado.id AND contratado.cliente = $1 AND tipo.id = ofertado.tipo",
+        "WHERE contratado.servico = ofertado.id AND contratado.cliente = $1 AND tipo.id = ofertado.tipo ORDER BY contratado.datapedido DESC",
       [email]
     )
     .then((servicos: ServicoContratado[]) => {

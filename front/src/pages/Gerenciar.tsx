@@ -2,7 +2,8 @@ import * as React from "react";
 import {
   ofertadosPorPrestador,
   servicosPorPrestador,
-  aceitaServico
+  aceitaServico,
+  finalizaServico
 } from "../http";
 import {
   Oferta,
@@ -15,32 +16,36 @@ import {
 } from "../../../back/server/handlers/get/servicosPorPrestador";
 import statusMap from "./statusMap";
 import * as Router from "react-router-dom";
+import timeago from "../timeago";
 
 interface State {
   ofertas: Oferta[];
   servicos: Servico[];
-  aceitaModal: boolean;
-  aceitaModalServico: Servico | null;
-  aceitaLoading: boolean;
+  modal: boolean;
+  modalServico: Servico | null;
+  modalLoading: boolean;
+  modalTipo: string;
+  notaFinalizar: string;
+  comentarioFinalizar: string;
 }
+
+const MODAL_ACEITAR = "MODAL_ACEITAR";
+const MODAL_FINALIZAR = "MODAL_FINALIZAR";
 
 const initialState: State = {
   ofertas: [],
   servicos: [],
-  aceitaModal: false,
-  aceitaModalServico: null,
-  aceitaLoading: false
+  modal: false,
+  modalServico: null,
+  modalLoading: false,
+  modalTipo: "",
+  notaFinalizar: "1",
+  comentarioFinalizar: ""
 };
 
 const cobrancaMap = ["por hora", "por dia", "cobrança única"];
 const cobrancaMap2 = ["horas", "dias", "unidade"];
 
-const formatDate = (date: string | null): string => {
-  if (date) {
-    return new Date(date).toLocaleString();
-  }
-  return "";
-};
 class Gerenciar extends React.Component<
   {
     jwt: string;
@@ -96,13 +101,7 @@ class Gerenciar extends React.Component<
           <abbr title="Nota dada">ND</abbr>
         </th>
         <th>
-          <abbr title="Comentário dado">CD</abbr>
-        </th>
-        <th>
           <abbr title="Nota recebida">NR</abbr>
-        </th>
-        <th>
-          <abbr title="Comentário recebido">CR</abbr>
         </th>
         <th>Gerenciar</th>
       </tr>
@@ -113,15 +112,20 @@ class Gerenciar extends React.Component<
     if (s.status === 0) {
       const onClick = this.openAceitaModal(s);
       return (
-        <div className="button is-link" onClick={onClick}>
+        <button className="button is-link" onClick={onClick}>
           ACEITAR
-        </div>
+        </button>
       );
     }
     if (s.status === 1) {
-      return <div className="button is-success">FINALIZAR</div>;
+      const onClick = this.openFinalizaModal(s);
+      return (
+        <button onClick={onClick} className="button is-success">
+          FINALIZAR
+        </button>
+      );
     }
-    return <div className="button">ERRO</div>;
+    return null;
   };
 
   renderTableRow = (s: Servico) => (
@@ -131,28 +135,27 @@ class Gerenciar extends React.Component<
       <td>R${(s.valor / 100).toFixed(2)}</td>
       <td>{s.quantidade}</td>
       <td>R${(s.valor * s.quantidade / 100).toFixed(2)}</td>
-      <td>{formatDate(s.datapedido)}</td>
-      <td>{formatDate(s.dataconclusao)}</td>
+      <td>{timeago(s.datapedido)}</td>
+      <td>{timeago(s.dataconclusao)}</td>
       <td>{s.notacliente}</td>
-      <td>{s.comentariocliente}</td>
       <td>{s.notaprestador}</td>
-      <td>{s.comentarioprestador}</td>
       <td>{this.renderGerenciarButton(s)}</td>
     </tr>
   );
 
   aceitaServico = () => {
-    if (!this.state.aceitaModalServico) {
+    if (!this.state.modalServico || this.state.modalTipo === "") {
       return;
     }
-    this.setState({ aceitaLoading: true });
-    aceitaServico({ id: this.state.aceitaModalServico.id }, this.props.jwt)
+
+    this.setState({ modalLoading: true });
+    aceitaServico({ id: this.state.modalServico.id }, this.props.jwt)
       .then(({ id, status }) => {
         this.setState(state => ({
           ...state,
-          aceitaLoading: false,
-          aceitaModal: false,
-          aceitaModalServico: null,
+          modalLoading: false,
+          modal: false,
+          modalServico: null,
           servicos: state.servicos.map(s => {
             if (s.id === id) {
               return { ...s, status };
@@ -160,19 +163,99 @@ class Gerenciar extends React.Component<
           })
         }));
       })
-      .catch(this.props.handleHttpError);
+      .catch(err => {
+        this.setState({ modalLoading: false });
+        this.props.handleHttpError(err);
+      });
   };
 
+  finalizaServico = () => {
+    if (!this.state.modalServico || this.state.modalTipo === "") {
+      return;
+    }
+
+    this.setState({ modalLoading: true });
+    finalizaServico(
+      {
+        id: this.state.modalServico.id,
+        notacliente: parseInt(this.state.notaFinalizar, 10),
+        comentariocliente: this.state.comentarioFinalizar
+      },
+      this.props.jwt
+    )
+      .then(({ id, status }) => {
+        this.setState(state => ({
+          ...state,
+          modalLoading: false,
+          modal: false,
+          modalServico: null,
+          notaFinalizar: 1,
+          comentarioFinalizar: "",
+          servicos: state.servicos.map(s => {
+            if (s.id === id) {
+              return {
+                ...s,
+                status,
+                notacliente: state.notaFinalizar,
+                comentariocliente: state.comentarioFinalizar,
+                dataconclusao: new Date().toString()
+              };
+            } else return s;
+          })
+        }));
+      })
+      .catch(err => {
+        this.setState({ modalLoading: false });
+        this.props.handleHttpError(err);
+      });
+  };
+
+  onComentarioChange = (event: any) =>
+    this.setState({ comentarioFinalizar: event.target.value });
+  onNotaChange = (event: any) =>
+    this.setState({ notaFinalizar: event.target.value });
+
+  renderAvaliacaoInput = () =>
+    this.state.modalTipo === MODAL_FINALIZAR
+      ? [
+          <div className="field" key="senha">
+            <label className="label is-link">Nota</label>
+            <div className="select">
+              <select
+                value={this.state.notaFinalizar}
+                onChange={this.onNotaChange}
+                disabled={this.state.modalLoading}
+              >
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+              </select>
+            </div>
+          </div>,
+          <div className="field" key="email">
+            <label className="label">Comentário</label>
+            <div className="control">
+              <textarea
+                className="textarea is-link"
+                value={this.state.comentarioFinalizar}
+                disabled={this.state.modalLoading}
+                onChange={this.onComentarioChange}
+              />
+            </div>
+          </div>
+        ]
+      : null;
+
   renderAceitaModal = () => {
-    const s = this.state.aceitaModalServico;
+    const s = this.state.modalServico;
     return s ? (
       <div
-        className={["modal", this.state.aceitaModal ? "is-active" : ""].join(
-          " "
-        )}
+        className={["modal", this.state.modal ? "is-active" : ""].join(" ")}
         key="modal"
       >
-        <div className="modal-background" onClick={this.closeAceitaModal} />
+        <div className="modal-background" onClick={this.closeModal} />
         <div className="modal-content">
           <div className="box">
             <p className="title">{s.nome}</p>
@@ -184,20 +267,29 @@ class Gerenciar extends React.Component<
               ).toFixed(2)}
             </p>
             <hr />
+            {this.renderAvaliacaoInput()}
             <nav className="level">
               <div className="level-left">
                 <div className="level-item">
                   <button
-                    disabled={this.state.aceitaLoading}
-                    onClick={this.aceitaServico}
+                    disabled={this.state.modalLoading}
+                    onClick={
+                      this.state.modalTipo === MODAL_ACEITAR
+                        ? this.aceitaServico
+                        : this.finalizaServico
+                    }
                     className="button is-success"
                   >
-                    Aceitar
+                    {this.state.modalTipo === MODAL_ACEITAR
+                      ? "ACEITAR"
+                      : "FINALIZAR"}
                   </button>
                 </div>
                 <div className="level-item">
                   <button disabled className="button is-danger">
-                    Negar
+                    {this.state.modalTipo === MODAL_ACEITAR
+                      ? "NEGAR"
+                      : "INFORMAR PROBLEMA"}
                   </button>
                 </div>
               </div>
@@ -207,16 +299,20 @@ class Gerenciar extends React.Component<
         <button
           className="modal-close is-large"
           aria-label="close"
-          onClick={this.closeAceitaModal}
+          onClick={this.closeModal}
         />
       </div>
     ) : null;
   };
 
   openAceitaModal = (s: Servico) => () =>
-    this.setState({ aceitaModal: true, aceitaModalServico: s });
-  closeAceitaModal = () =>
-    this.setState({ aceitaModal: false, aceitaModalServico: null });
+    this.setState({ modalTipo: MODAL_ACEITAR, modal: true, modalServico: s });
+
+  openFinalizaModal = (s: Servico) => () =>
+    this.setState({ modalTipo: MODAL_FINALIZAR, modal: true, modalServico: s });
+
+  closeModal = () =>
+    this.setState({ modalTipo: "", modal: false, modalServico: null });
 
   render() {
     return [
@@ -243,7 +339,7 @@ class Gerenciar extends React.Component<
           </div>
         </div>
       </section>,
-      !this.state.aceitaModal && (
+      !this.state.modal && (
         <section className="section" key="body">
           <div className="container">
             <h1 className="title">Gerenciar contratos</h1>

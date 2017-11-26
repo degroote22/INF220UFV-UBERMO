@@ -9,10 +9,14 @@ import {
   Response as RequisitaResponse
 } from "../../../back/server/handlers/post/requisitaServico";
 import { LoginResponse } from "../../../back/server/handlers/shared/login";
-import { Response as TiposReponse } from "../../../back/server/handlers/get/tipos";
+import { Response as TiposOfertadosReponse } from "../../../back/server/handlers/get/tiposOfertados";
+import { Response as TiposResponse } from "../../../back/server/handlers/get/tipos";
 import { Response as FincancaResponse } from "../../../back/server/handlers/get/financaCliente";
 import { RequestBody as CadastraTipoRequest } from "../../../back/server/handlers/post/cadastraTipo";
 import { Request as AceitaServicoBody } from "../../../back/server/handlers/post/aceitaServico";
+import { Request as FinalizaServicoBody } from "../../../back/server/handlers/post/finalizaServico";
+import { Request as ClienteAvaliaBody } from "../../../back/server/handlers/post/clienteAvalia";
+import { RequestBody as PrestadorOfereceBody } from "../../../back/server/handlers/post/ofereceServico";
 
 export const loginAdmin = (email: string, senha: string) => {
   const body: RequestBodyLogin = {
@@ -21,6 +25,18 @@ export const loginAdmin = (email: string, senha: string) => {
   };
   return postInjected("loginadmin", body);
 };
+
+export const ofereceServico = (body: PrestadorOfereceBody, jwt: string) =>
+  postInjected("ofereceservico", body, jwt);
+
+export const clienteAvalia = (body: ClienteAvaliaBody, jwt: string) =>
+  postInjected("clienteavalia", body, jwt);
+
+export const financaPrestador = (jwt: string) =>
+  getInjected("financaprestador", jwt);
+
+export const finalizaServico = (body: FinalizaServicoBody, jwt: string) =>
+  postInjected("finalizaservico", body, jwt);
 
 export const aceitaServico = (body: AceitaServicoBody, jwt: string) =>
   postInjected("aceitaservico", body, jwt);
@@ -61,7 +77,10 @@ export const requisitaServico = (
 export const financaCliente = (jwt: string): Promise<FincancaResponse> =>
   getInjected("financacliente", jwt);
 
-export const tipos = (): Promise<TiposReponse> => getInjected("tipos");
+export const tiposOfertados = (): Promise<TiposOfertadosReponse> =>
+  getInjected("tiposofertados");
+
+export const tipos = (): Promise<TiposResponse> => getInjected("tipos");
 
 export const servico = (id: number | string) =>
   getInjected("servico?id=" + String(id));

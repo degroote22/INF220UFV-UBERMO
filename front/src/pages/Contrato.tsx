@@ -4,6 +4,9 @@ import { Contrato as Response } from "../../../back/server/handlers/get/contrato
 import { contrato } from "../http";
 import ServicoHeader from "./ServicoHeader";
 import statusMap from "./statusMap";
+import { ModalServico } from "./Cliente";
+import timeago from "../timeago";
+
 const initialServico = {
   id: 0,
   valor: 0, //
@@ -37,16 +40,11 @@ const initialState: State = {
   loaded: false
 };
 const tempoServico = [" horas", " dias", " unidade"];
-const formatDate = (date: string | null): string => {
-  if (date) {
-    return new Date(date).toLocaleString();
-  }
-  return "";
-};
 
 class Contratar extends React.Component<
   {
     handleHttpError: (error: any) => void;
+    openModal: (s: ModalServico, cb: any) => void;
     jwt: string;
   },
   State
@@ -54,6 +52,9 @@ class Contratar extends React.Component<
   state = initialState;
   ref: any;
   componentDidMount() {
+    this.refresh();
+  }
+  refresh = () => {
     const id = parseInt((this.props as any).match.params.id, 10);
     contrato(id, this.props.jwt)
       .then((response: Response) => {
@@ -62,13 +63,54 @@ class Contratar extends React.Component<
       .catch(err => {
         this.props.handleHttpError(err);
       });
-  }
+  };
   getWidth = (): number => {
     if (this.ref) {
       return this.ref.clientWidth;
     }
     return 0;
   };
+
+  onAvaliarClick = () => {
+    const s = this.state.servico;
+    this.props.openModal(
+      {
+        id: s.id,
+        valor: s.valor,
+        quantidade: s.quantidade,
+        tipocobranca: s.tipocobranca
+      },
+      this.refresh
+    );
+  };
+
+  renderBotao = () => {
+    if (this.state.servico.status === 0 || this.state.servico.status === 1)
+      return null;
+
+    return this.state.servico.notaprestador &&
+      this.state.servico.status === 2 ? (
+      <div className="box" key="c">
+        {this.state.servico.comentarioprestador !== "" && (
+          <h2 className="is-size-4">
+            "{this.state.servico.comentarioprestador}"
+          </h2>
+        )}
+        <h1 className="title">{this.state.servico.notaprestador} pontos</h1>
+        <h1 className="subtitle">você avaliou</h1>
+      </div>
+    ) : (
+      <div className="box is-shadowless" key="avalie">
+        <button
+          className="button is-large is-fullwidth is-success"
+          onClick={this.onAvaliarClick}
+        >
+          AVALIAR O PRESTADOR
+        </button>
+      </div>
+    );
+  };
+
   render() {
     return (
       <div className="container" key="dados" ref={ref => (this.ref = ref)}>
@@ -108,7 +150,7 @@ class Contratar extends React.Component<
                 <div className="box is-shadowless">
                   <h1 className="title">Data do pedido</h1>
                   <h2 className="subtitle">
-                    {formatDate(this.state.servico.datapedido)}
+                    {timeago(this.state.servico.datapedido)}
                   </h2>
                 </div>
               </div>
@@ -117,7 +159,7 @@ class Contratar extends React.Component<
                 <div className="box is-shadowless">
                   <h1 className="title">Data da conclusão</h1>
                   <h2 className="subtitle">
-                    {formatDate(this.state.servico.dataconclusao)}
+                    {timeago(this.state.servico.dataconclusao)}
                   </h2>
                 </div>
               </div>
@@ -130,22 +172,14 @@ class Contratar extends React.Component<
             <h1 className="subtitle">status da transação</h1>
           </div>
 
-          {this.state.servico.notacliente && (
-            <div className="box" key="c">
-              <h2 className="is-size-4">
-                "{this.state.servico.comentarioprestador}"
-              </h2>
-              <h1 className="title">
-                {this.state.servico.notaprestador} pontos
-              </h1>
-              <h1 className="subtitle">você avaliou</h1>
-            </div>
-          )}
+          {this.renderBotao()}
           {this.state.servico.notacliente && (
             <div className="box " key="b">
-              <h2 className="is-size-4">
-                "{this.state.servico.comentariocliente}"
-              </h2>
+              {this.state.servico.comentariocliente !== "" && (
+                <h2 className="is-size-4">
+                  "{this.state.servico.comentariocliente}"
+                </h2>
+              )}
               <h1 className="title">{this.state.servico.notacliente} pontos</h1>
               <h1 className="subtitle">você foi avaliado</h1>
             </div>

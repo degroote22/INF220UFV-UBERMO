@@ -51,7 +51,7 @@ export default async (
 
     await db
       .one(
-        "SELECT ofertado.id, ofertado.valor, ofertado.descricao, ofertado.lat, ofertado.lng, " +
+        "SELECT contratado.id, ofertado.valor, ofertado.descricao, ofertado.lat, ofertado.lng, " +
           "tipo.tipocobranca, tipo.nome, prestador.nome as nomeprestador, prestador.nota as notaglobalprestador, " +
           "prestador.email as emailprestador, prestador.foto as fotoprestador, " +
           "contratado.quantidade as quantidade, contratado.datapedido as datapedido, " +
