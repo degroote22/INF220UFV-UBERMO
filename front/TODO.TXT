@@ -13,3 +13,29 @@ PRESTADOR:
   [ ] financa prestador
   [ ] oferecer servico (e ver quem mais ja oferece daquele tipo)
 
+DEPLOY:
+  [ ] banco de dados
+  [ ] api
+  [ ] front-end
+
+
+
+
+
+PRESTADOR:
+  [ ] esqueleto e navegação
+  [x] ver ofertas
+  [x] botao de ofertar
+  [ ] ofertar
+
+/prestador
+/prestador/criar
+/prestador/dados
+
+//Suas ofertas + botão ofertar(na oferta mostrar também o /prestadores)
+as 3 ~ 5 com 3 por linha
+//Gerenciar contratos
+tabela com os serviços e possiveis ações (aceitar, finalizar)
+
+//Meus dados
+tabela com as finanças /financaprestador

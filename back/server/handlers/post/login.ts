@@ -23,7 +23,6 @@ export default (kind: string) => (
   res: express.Response,
   next: express.NextFunction
 ) => {
-  console.log(req.body);
   validateBody(req.body);
 
   const db: pgPromise.IDatabase<{}> = res.locals.db;

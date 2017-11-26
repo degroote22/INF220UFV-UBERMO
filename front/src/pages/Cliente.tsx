@@ -210,9 +210,9 @@ class Cliente extends React.Component<
         <Router.Link to={`/cliente/contrato/${s.id}`}>{s.nome}</Router.Link>
       </th>
       <td>{statusMap[s.status]}</td>
-      <td>{(s.valor / 100).toFixed(2)}</td>
+      <td>R${(s.valor / 100).toFixed(2)}</td>
       <td>{s.quantidade}</td>
-      <td>{(s.valor * s.quantidade / 100).toFixed(2)}</td>
+      <td>R${(s.valor * s.quantidade / 100).toFixed(2)}</td>
       <td>{this.formatDate(s.datapedido)}</td>
       <td>{this.formatDate(s.dataconclusao)}</td>
       <td>{s.notacliente}</td>
@@ -303,27 +303,27 @@ class Cliente extends React.Component<
       <Router.Route
         exact
         path="/cliente"
-        component={this.renderPesquisar}
+        render={this.renderPesquisar}
         key="comprar"
       />,
       <Router.Route
         path="/cliente/dados"
-        component={this.renderDados}
+        render={this.renderDados}
         key="dados"
       />,
       <Router.Route
         path="/cliente/tipo/:id"
-        component={this.renderServicosPorTipo}
+        render={this.renderServicosPorTipo}
         key="tipos"
       />,
       <Router.Route
         path="/cliente/servico/:id"
-        component={this.renderServico}
+        render={this.renderServico}
         key="servico"
       />,
       <Router.Route
         path="/cliente/contrato/:id"
-        component={this.renderContrato}
+        render={this.renderContrato}
         key="contrato"
       />
     ];

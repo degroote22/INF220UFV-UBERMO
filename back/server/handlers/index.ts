@@ -14,6 +14,9 @@ import tipos from "./get/tipos";
 import servicosPorTipo from "./get/servicosPorTipo";
 import servico from "./get/servico";
 import contrato from "./get/contrato";
+import ofertasPorPrestador from "./get/ofertasPorPrestador";
+import servicosPorPrestador from "./get/servicosPorPrestador";
+import aceitaServico from "./post/aceitaServico";
 
 export default {
   cadastraCliente,
@@ -33,5 +36,8 @@ export default {
   tipos,
   servicosPorTipo,
   servico,
-  contrato
+  contrato,
+  servicosPorPrestador,
+  ofertasPorPrestador,
+  aceitaServico
 };

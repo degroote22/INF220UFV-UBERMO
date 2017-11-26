@@ -38,8 +38,9 @@ const initialState: State = {
 
 class App extends React.Component<{}, State> {
   state = initialState;
-
+  mounted = false;
   componentDidMount() {
+    this.mounted = true;
     try {
       const { jwt, nome, role } = getLocalStorage();
       this.setState({ jwt, nome, role });
@@ -109,6 +110,7 @@ class App extends React.Component<{}, State> {
   renderWelcome = () => {
     const { role } = this.state;
     if (role !== DESLOGADO) {
+      console.log("sou eu");
       if (role === CLIENTE) return <Redirect to="/cliente" />;
       if (role === PRESTADOR) return <Redirect to="/prestador" />;
     }
@@ -122,6 +124,7 @@ class App extends React.Component<{}, State> {
   };
 
   renderCliente = (props: any) => {
+    if (!this.mounted) return null;
     const { role } = this.state;
     if (role !== CLIENTE) return <Redirect to="/" />;
     return (
@@ -203,6 +206,21 @@ class App extends React.Component<{}, State> {
     );
   };
 
+  renderPrestador = (props: any) => {
+    const { role } = this.state;
+    if (!this.mounted) return null;
+    if (role !== PRESTADOR) return <Redirect to="/" />;
+    return (
+      <pages.Prestador
+        {...props}
+        nome={this.state.nome}
+        onLogoutClick={this.onLogoutClick}
+        jwt={this.state.jwt}
+        handleHttpError={this.handleHttpError}
+      />
+    );
+  };
+
   render() {
     const modalCN = ["modal", this.state.notification ? "is-active" : ""].join(
       " "
@@ -225,10 +243,11 @@ class App extends React.Component<{}, State> {
           </div>
           <div className="footerFix" key="site">
             <Switch>
-              <Route exact path="/" component={this.renderWelcome} />
-              <Route path="/registrar" component={this.renderRegistrar} />
-              <Route path="/cliente" component={this.renderCliente} />
-              <Route path="/admin" component={this.renderAdmin} />
+              <Route exact path="/" render={this.renderWelcome} />
+              <Route path="/registrar" render={this.renderRegistrar} />
+              <Route path="/cliente" render={this.renderCliente} />
+              <Route path="/admin" render={this.renderAdmin} />
+              <Route path="/prestador" render={this.renderPrestador} />
               <Route component={pages.NoMatch} />
             </Switch>
           </div>

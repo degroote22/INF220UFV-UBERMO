@@ -12,6 +12,7 @@ import { LoginResponse } from "../../../back/server/handlers/shared/login";
 import { Response as TiposReponse } from "../../../back/server/handlers/get/tipos";
 import { Response as FincancaResponse } from "../../../back/server/handlers/get/financaCliente";
 import { RequestBody as CadastraTipoRequest } from "../../../back/server/handlers/post/cadastraTipo";
+import { Request as AceitaServicoBody } from "../../../back/server/handlers/post/aceitaServico";
 
 export const loginAdmin = (email: string, senha: string) => {
   const body: RequestBodyLogin = {
@@ -20,6 +21,15 @@ export const loginAdmin = (email: string, senha: string) => {
   };
   return postInjected("loginadmin", body);
 };
+
+export const aceitaServico = (body: AceitaServicoBody, jwt: string) =>
+  postInjected("aceitaservico", body, jwt);
+
+export const servicosPorPrestador = (jwt: string) =>
+  getInjected("servicosporprestador", jwt);
+
+export const ofertadosPorPrestador = (jwt: string) =>
+  getInjected("ofertadosporprestador", jwt);
 
 export const cadastraTipo = (body: CadastraTipoRequest, jwt: string) =>
   postInjected("cadastratipo", body, jwt);
