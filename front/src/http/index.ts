@@ -4,7 +4,13 @@ import { Response as ResponseMaisContratados } from "../../../back/server/handle
 import { Response as ResponsePorCliente } from "../../../back/server/handlers/get/servicosPorCliente";
 import { RequestBody as BodyCliente } from "../../../back/server/handlers/post/cadastraCliente";
 import { RequestBody as BodyPrestador } from "../../../back/server/handlers/post/cadastraPrestador";
+import {
+  RequestBody as BodyRequisitaServico,
+  Response as RequisitaResponse
+} from "../../../back/server/handlers/post/requisitaServico";
 import { LoginResponse } from "../../../back/server/handlers/shared/login";
+import { Response as TiposReponse } from "../../../back/server/handlers/get/tipos";
+import { Response as FincancaResponse } from "../../../back/server/handlers/get/financaCliente";
 
 export const loginPrestador = (email: string, senha: string) => {
   const body: RequestBodyLogin = {
@@ -21,6 +27,22 @@ export const loginCliente = (email: string, senha: string) => {
   };
   return postInjected("logincliente", body);
 };
+
+export const requisitaServico = (
+  body: BodyRequisitaServico,
+  jwt: string
+): Promise<RequisitaResponse> => postInjected("requisitaservico", body, jwt);
+
+export const financaCliente = (jwt: string): Promise<FincancaResponse> =>
+  getInjected("financacliente", jwt);
+
+export const tipos = (): Promise<TiposReponse> => getInjected("tipos");
+
+export const servico = (id: number | string) =>
+  getInjected("servico?id=" + String(id));
+
+export const servicosPorTipo = (tipo: number | string) =>
+  getInjected("servicosportipo?tipo=" + String(tipo));
 
 export const servicosMaisContratados = (
   limit: number

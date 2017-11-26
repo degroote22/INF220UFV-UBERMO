@@ -106,7 +106,7 @@ class App extends React.Component<{}, State> {
   renderWelcome = () => {
     const { role } = this.state;
     if (role !== DESLOGADO) {
-      if (role === CLIENTE) return <Redirect to="/cliente" />;
+      if (role === CLIENTE) return <Redirect to="/cliente/dados" />;
       if (role === PRESTADOR) return <Redirect to="/prestador" />;
     }
     return (
@@ -118,18 +118,17 @@ class App extends React.Component<{}, State> {
     );
   };
 
-  renderCliente = (router: any) => {
+  renderCliente = (props: any) => {
     const { role } = this.state;
     if (role !== CLIENTE) return <Redirect to="/" />;
-
     return (
       <pages.Cliente
+        {...props}
         key="cliente"
         nome={this.state.nome}
         onLogoutClick={this.onLogoutClick}
         jwt={this.state.jwt}
         handleHttpError={this.handleHttpError}
-        pathname={router.location.pathname}
       />
     );
   };

@@ -1,2 +1,15 @@
-[ ] servicosporcliente
-[ ] finanças do cliente
+CLIENTE:
+  [ ] ver contrato
+  [ ] dar nota pro servico
+
+ADMIN:
+  [ ] login
+  [ ] criar tipo
+
+PESTADOR:
+  [ ] finalizar servico
+  [ ] aceitar servico
+  [ ] clientes mais contratacoes
+  [ ] financa prestador
+  [ ] oferecer servico (e ver quem mais ja oferece daquele tipo)
+

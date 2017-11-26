@@ -93,8 +93,8 @@ const initialPrestador: BodyPrestador = {
 };
 
 const initialState = {
-  step: STEP3,
-  role: roles.CLIENTE,
+  step: STEP0,
+  role: "",
   payloadCliente: initalCliente,
   payloadPrestador: initialPrestador
 };
