@@ -11,6 +11,18 @@ import {
 import { LoginResponse } from "../../../back/server/handlers/shared/login";
 import { Response as TiposReponse } from "../../../back/server/handlers/get/tipos";
 import { Response as FincancaResponse } from "../../../back/server/handlers/get/financaCliente";
+import { RequestBody as CadastraTipoRequest } from "../../../back/server/handlers/post/cadastraTipo";
+
+export const loginAdmin = (email: string, senha: string) => {
+  const body: RequestBodyLogin = {
+    email,
+    senha
+  };
+  return postInjected("loginadmin", body);
+};
+
+export const cadastraTipo = (body: CadastraTipoRequest, jwt: string) =>
+  postInjected("cadastratipo", body, jwt);
 
 export const loginPrestador = (email: string, senha: string) => {
   const body: RequestBodyLogin = {
@@ -27,6 +39,9 @@ export const loginCliente = (email: string, senha: string) => {
   };
   return postInjected("logincliente", body);
 };
+
+export const contrato = (id: number, jwt: string) =>
+  getInjected("contrato?id=" + String(id), jwt);
 
 export const requisitaServico = (
   body: BodyRequisitaServico,

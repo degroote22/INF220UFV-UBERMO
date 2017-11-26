@@ -13,6 +13,7 @@ import financaPrestador from "./get/financaPrestador";
 import tipos from "./get/tipos";
 import servicosPorTipo from "./get/servicosPorTipo";
 import servico from "./get/servico";
+import contrato from "./get/contrato";
 
 export default {
   cadastraCliente,
@@ -31,5 +32,6 @@ export default {
   financaPrestador,
   tipos,
   servicosPorTipo,
-  servico
+  servico,
+  contrato
 };

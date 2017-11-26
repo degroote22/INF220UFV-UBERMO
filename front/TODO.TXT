@@ -1,12 +1,12 @@
 CLIENTE:
-  [ ] ver contrato
+  [x] ver contrato
   [ ] dar nota pro servico
 
 ADMIN:
-  [ ] login
-  [ ] criar tipo
+  [x] login
+  [x] criar tipo
 
-PESTADOR:
+PRESTADOR:
   [ ] finalizar servico
   [ ] aceitar servico
   [ ] clientes mais contratacoes

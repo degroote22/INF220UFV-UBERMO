@@ -2,6 +2,7 @@ import * as React from "react";
 import { servico, requisitaServico } from "../http";
 import { Servico as Response } from "../../../back/server/handlers/get/servico";
 import * as Router from "react-router-dom";
+import ServicoHeader from "./ServicoHeader";
 
 const initialData = {
   id: 0,
@@ -12,7 +13,7 @@ const initialData = {
   tipocobranca: 0,
   nome: "",
   nomeprestador: "",
-  notaprestador: "",
+  notaprestador: 0,
   emailprestador: "",
   fotoprestador: ""
 };
@@ -26,9 +27,6 @@ const initialState = {
   requisitado: 0
 };
 
-const key = "AIzaSyBU_yn5R5tbfGkaEW0NV_rADV23mFy5x0w";
-
-const tiposCobranca = ["por hora", "por dia", "pelo serviço"];
 const tempoCobranca = ["(horas)", "(dias)", ""];
 class Servico extends React.Component<
   {
@@ -55,15 +53,6 @@ class Servico extends React.Component<
         this.props.handleHttpError(err);
       });
   }
-
-  ref: any;
-
-  getMapSize = (): number => {
-    if (this.ref) {
-      return this.ref.clientWidth;
-    }
-    return 0;
-  };
 
   changeQuantidade = (event: any) =>
     this.setState({ quantidade: Number(event.target.value) });
@@ -135,6 +124,14 @@ class Servico extends React.Component<
       </div>
     </nav>
   );
+  ref: any;
+
+  getWidth = (): number => {
+    if (this.ref) {
+      return this.ref.clientWidth;
+    }
+    return 0;
+  };
 
   render() {
     if (this.state.requisitado !== 0) {
@@ -142,61 +139,24 @@ class Servico extends React.Component<
         <Router.Redirect to={`/cliente/contrato/${this.state.requisitado}`} />
       );
     }
-    const mapSize = this.getMapSize();
-    const mapurl = this.state.loaded
-      ? [
-          "https://maps.googleapis.com/maps/api/staticmap?",
-          `center=${this.state.data.lat},${this.state.data.lng}`,
-          "&zoom=13",
-          "&scale=2",
-          `&size=${mapSize}x${150}`,
-          "&maptype=roadmap",
-          `&markers=color:blue|${this.state.data.lat},${this.state.data.lng}`,
-          "&key=",
-          key
-        ].join("")
-      : "";
 
     return (
       <div className="container" key="dados" ref={ref => (this.ref = ref)}>
         <section className="section">
-          <div className="box is-shadowless">
-            <img src={mapurl} />
-          </div>
-          <div className="level">
-            <div className="level-left">
-              <div className="box is-shadowless">
-                <h3 className="title">{this.state.data.nome}</h3>
-                <h5 className="subtitle">
-                  R${(this.state.data.valor / 100).toFixed(2)}{" "}
-                  {tiposCobranca[this.state.data.tipocobranca]}
-                </h5>
-                <p className="is-size-6	">{this.state.data.descricao}</p>
-              </div>
-            </div>
+          <ServicoHeader
+            loaded={this.state.loaded}
+            width={this.getWidth()}
+            lat={this.state.data.lat}
+            lng={this.state.data.lng}
+            nome={this.state.data.nome}
+            valor={this.state.data.valor}
+            tipocobranca={this.state.data.tipocobranca}
+            descricao={this.state.data.descricao}
+            fotoprestador={this.state.data.fotoprestador}
+            nomeprestador={this.state.data.nomeprestador}
+            notaprestador={this.state.data.notaprestador}
+          />
 
-            <div className="level-right">
-              <div className="media">
-                <div className="media-left">
-                  <p className="image is-128x128">
-                    <img
-                      width={128}
-                      height={128}
-                      src={"https://" + this.state.data.fotoprestador}
-                    />
-                  </p>
-                </div>
-                <div className="media-right">
-                  <div className="box is-shadowless">
-                    <h3 className="title">{this.state.data.nomeprestador}</h3>
-                    <h5 className="subtitle">
-                      {this.state.data.notaprestador} pontos
-                    </h5>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
           <hr />
           <div className="box is-shadowless">
             {this.state.contratar ? (

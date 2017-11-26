@@ -32,5 +32,6 @@ router.get(
 router.get("/tipos", handlers.tipos);
 router.get("/servicosportipo", handlers.servicosPorTipo);
 router.get("/servico", handlers.servico);
+router.get("/contrato", barrier("cliente"), handlers.contrato);
 
 export = router;

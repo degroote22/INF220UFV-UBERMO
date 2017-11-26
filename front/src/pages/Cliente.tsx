@@ -13,13 +13,7 @@ import ServicosPorTipo from "./ServicosPorTipo";
 import Servico from "./Servico";
 import Contrato from "./Contrato";
 import { Response as FincancaResponse } from "../../../back/server/handlers/get/financaCliente";
-
-// export const PEDIDO = 0;
-// export const ACEITO = 1;
-// export const CONCLUIDO = 2;
-// export const FALHA = 3;
-
-const statusMap = ["Pedido", "Aceito", "Concluído", "Falha"];
+import statusMap from "./statusMap";
 
 class Cliente extends React.Component<
   {
@@ -47,7 +41,7 @@ class Cliente extends React.Component<
     }
   };
 
-  componentDidMount() {
+  refreshData = () => {
     financaCliente(this.props.jwt)
       .then(response => this.setState({ financa: response }))
       .catch(this.props.handleHttpError);
@@ -63,10 +57,15 @@ class Cliente extends React.Component<
     tipos()
       .then(response => this.setState({ todosTipos: response.tipos }))
       .catch(this.props.handleHttpError);
+  };
+
+  componentDidMount() {
+    this.refreshData();
   }
 
   renderDadosBotao = () => (
     <Router.Link
+      onClick={this.refreshData}
       to={"/cliente/dados"}
       style={{ marginRight: 32 }}
       className="button is-pulled-right is-outlined has-text-primary	 is-large"
@@ -197,20 +196,6 @@ class Cliente extends React.Component<
       </div>
     </div>
   );
-  // {
-  //   id: number;
-  //   nome: string;
-  //   valor: number;
-  //   quantidade: number;
-  //   tipocobranca: number;
-  //   datapedido: string;
-  //   dataconclusao: string;
-  //   status: number;
-  //   notacliente: number;
-  //   comentariocliente: string;
-  //   notaprestador: number;
-  //   comentarioprestador: string;
-  // }
 
   formatDate = (date: string | null): string => {
     if (date) {
@@ -221,7 +206,9 @@ class Cliente extends React.Component<
 
   tableRow = (s: ServicoContratado) => (
     <tr key={s.id}>
-      <th>{s.nome}</th>
+      <th>
+        <Router.Link to={`/cliente/contrato/${s.id}`}>{s.nome}</Router.Link>
+      </th>
       <td>{statusMap[s.status]}</td>
       <td>{(s.valor / 100).toFixed(2)}</td>
       <td>{s.quantidade}</td>
@@ -235,58 +222,60 @@ class Cliente extends React.Component<
     </tr>
   );
 
-  renderDados = () => (
-    <div className="container" key="dados">
-      <section className="section">
-        <div className="container">
-          <h3 className="title">Meus gastos</h3>
-        </div>
-        <div className="columns">
-          {this.financaBox("Hoje", this.state.financa.hoje)}
-          {this.financaBox("Semana", this.state.financa.semana)}
-          {this.financaBox("Mês", this.state.financa.mes)}
-          {this.financaBox("Ano", this.state.financa.ano)}
-        </div>
-      </section>
-      <section className="section">
-        <div className="container">
-          <h3 className="title">Últimos contratos</h3>
-        </div>
-        <table className="table is-fullwidth">
-          <thead>
-            <tr>
-              <th>Nome</th>
-              <th>Status</th>
-              <th>Preço</th>
-              <th>
-                <abbr title="Quantidade">Qtd</abbr>
-              </th>
-              <th>Total</th>
-              <th>
-                <abbr title="Data do Pedido">DP</abbr>
-              </th>
-              <th>
-                <abbr title="Data da Conclusão">DC</abbr>
-              </th>
-              <th>
-                <abbr title="Nota dada">ND</abbr>
-              </th>
-              <th>
-                <abbr title="Comentário dado">CD</abbr>
-              </th>
-              <th>
-                <abbr title="Nota recebida">NR</abbr>
-              </th>
-              <th>
-                <abbr title="Comentário recebido">CR</abbr>
-              </th>
-            </tr>
-          </thead>
-          <tbody>{this.state.porCliente.map(this.tableRow)}</tbody>
-        </table>
-      </section>
-    </div>
-  );
+  renderDados = () => {
+    return (
+      <div className="container" key="dados">
+        <section className="section">
+          <div className="container">
+            <h3 className="title">Meus gastos</h3>
+          </div>
+          <div className="columns">
+            {this.financaBox("Hoje", this.state.financa.hoje)}
+            {this.financaBox("Semana", this.state.financa.semana)}
+            {this.financaBox("Mês", this.state.financa.mes)}
+            {this.financaBox("Ano", this.state.financa.ano)}
+          </div>
+        </section>
+        <section className="section">
+          <div className="container">
+            <h3 className="title">Últimos contratos</h3>
+          </div>
+          <table className="table is-fullwidth">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Status</th>
+                <th>Preço</th>
+                <th>
+                  <abbr title="Quantidade">Qtd</abbr>
+                </th>
+                <th>Total</th>
+                <th>
+                  <abbr title="Data do Pedido">DP</abbr>
+                </th>
+                <th>
+                  <abbr title="Data da Conclusão">DC</abbr>
+                </th>
+                <th>
+                  <abbr title="Nota dada">ND</abbr>
+                </th>
+                <th>
+                  <abbr title="Comentário dado">CD</abbr>
+                </th>
+                <th>
+                  <abbr title="Nota recebida">NR</abbr>
+                </th>
+                <th>
+                  <abbr title="Comentário recebido">CR</abbr>
+                </th>
+              </tr>
+            </thead>
+            <tbody>{this.state.porCliente.map(this.tableRow)}</tbody>
+          </table>
+        </section>
+      </div>
+    );
+  };
 
   renderServicosPorTipo = (props: any) => (
     <ServicosPorTipo {...props} handleHttpError={this.props.handleHttpError} />
@@ -301,7 +290,11 @@ class Cliente extends React.Component<
   );
 
   renderContrato = (props: any) => (
-    <Contrato {...props} handleHttpError={this.props.handleHttpError} />
+    <Contrato
+      {...props}
+      handleHttpError={this.props.handleHttpError}
+      jwt={this.props.jwt}
+    />
   );
 
   render() {

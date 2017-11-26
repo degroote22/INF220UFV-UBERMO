@@ -18,7 +18,7 @@ export interface Servico {
   tipocobranca: number;
   nome: string;
   nomeprestador: string;
-  notaprestador: string;
+  notaprestador: number;
   emailprestador: string;
   fotoprestador: string;
 }

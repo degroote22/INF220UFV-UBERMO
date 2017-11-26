@@ -3,6 +3,7 @@ import pages from "./pages";
 import {
   loginCliente,
   loginPrestador,
+  loginAdmin,
   cadastraCliente,
   cadastraPrestador
 } from "./http";
@@ -85,7 +86,9 @@ class App extends React.Component<{}, State> {
     let fn =
       role === CLIENTE
         ? () => loginCliente(email, senha)
-        : () => loginPrestador(email, senha);
+        : role === PRESTADOR
+          ? () => loginPrestador(email, senha)
+          : () => loginAdmin(email, senha);
     fn()
       .then(r => {
         this.setState({ loginLoading: false });
@@ -106,7 +109,7 @@ class App extends React.Component<{}, State> {
   renderWelcome = () => {
     const { role } = this.state;
     if (role !== DESLOGADO) {
-      if (role === CLIENTE) return <Redirect to="/cliente/dados" />;
+      if (role === CLIENTE) return <Redirect to="/cliente" />;
       if (role === PRESTADOR) return <Redirect to="/prestador" />;
     }
     return (
@@ -183,6 +186,23 @@ class App extends React.Component<{}, State> {
     );
   };
 
+  renderAdmin = (props: any) => {
+    // const { role } = this.state;
+    // if (role !== ADMIN) {
+    //   return <Redirect to="/" />;
+    // }
+    return (
+      <pages.Admin
+        {...props}
+        handleHttpError={this.handleHttpError}
+        jwt={this.state.jwt}
+        role={this.state.role}
+        onLoginClick={this.onLoginClick}
+        onLogoutClick={this.onLogoutClick}
+      />
+    );
+  };
+
   render() {
     const modalCN = ["modal", this.state.notification ? "is-active" : ""].join(
       " "
@@ -206,8 +226,9 @@ class App extends React.Component<{}, State> {
           <div className="footerFix" key="site">
             <Switch>
               <Route exact path="/" component={this.renderWelcome} />
-              <Route exact path="/registrar" component={this.renderRegistrar} />
+              <Route path="/registrar" component={this.renderRegistrar} />
               <Route path="/cliente" component={this.renderCliente} />
+              <Route path="/admin" component={this.renderAdmin} />
               <Route component={pages.NoMatch} />
             </Switch>
           </div>
