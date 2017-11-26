@@ -1,0 +1,12 @@
+{
+  "name": "INF220UFV-UBERMO",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/degroote22/INF220UFV-UBERMO.git",
+  "author": "la <lucas.a.martins@ufv.br>",
+  "license": "MIT",
+  "scripts": {
+    "build":
+      "cd front && yarn build && cp -R build ../back/build && cd .. && cd back && yarn build"
+  }
+}

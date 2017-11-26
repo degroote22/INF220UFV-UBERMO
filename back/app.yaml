@@ -1,2 +1,11 @@
 runtime: nodejs
 env: flex
+
+env_variables:
+  SQL_USER: postgres
+  SQL_PASSWORD: ubermo
+  SQL_DATABASE: postgres
+  INSTANCE_CONNECTION_NAME: ubermo-1511635953006:southamerica-east1:ubermo
+
+beta_settings:
+  cloud_sql_instances: ubermo-1511635953006:southamerica-east1:ubermo

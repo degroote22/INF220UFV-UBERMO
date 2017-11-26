@@ -16,6 +16,7 @@ let config: any = {
   password: process.env.SQL_PASSWORD,
   database: process.env.SQL_DATABASE
 };
+config.host = `/cloudsql/${process.env.INSTANCE_CONNECTION_NAME}`;
 
 if (
   process.env.INSTANCE_CONNECTION_NAME &&
@@ -23,6 +24,7 @@ if (
 ) {
   config.host = `/cloudsql/${process.env.INSTANCE_CONNECTION_NAME}`;
 }
+
 if (process.env.NODE_ENV === "development") {
   const cn = {
     host: "localhost",
@@ -49,8 +51,9 @@ app.use(
     };
     res.locals.handleError = handleError;
     res.locals.db = db;
-    setTimeout(next, 300);
-    // next();
+    res.locals.config = config;
+    // setTimeout(next, 300);
+    next();
   }
 );
 

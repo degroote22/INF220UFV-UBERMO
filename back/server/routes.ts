@@ -47,5 +47,11 @@ router.get(
   barrier("prestador"),
   handlers.ofertasPorPrestador
 );
+router.get(
+  "/v",
+  (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    res.json({ message: res.locals.config, v: "v3" });
+  }
+);
 
 export = router;
