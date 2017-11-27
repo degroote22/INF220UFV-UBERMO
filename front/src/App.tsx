@@ -59,7 +59,7 @@ class App extends React.Component<{}, State> {
   };
 
   logout = () => {
-    this.setState(initialState);
+    this.setState({ ...initialState, mounted: true });
     clearLocalStorage();
   };
 
