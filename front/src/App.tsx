@@ -24,6 +24,7 @@ interface State {
   jwt: string;
   role: string;
   registerLoading: boolean;
+  mounted: boolean;
 }
 
 const initialState: State = {
@@ -33,18 +34,18 @@ const initialState: State = {
   notificationText: "",
   nome: "",
   jwt: "",
-  role: DESLOGADO
+  role: DESLOGADO,
+  mounted: false
 };
 
 class App extends React.Component<{}, State> {
   state = initialState;
-  mounted = false;
   componentDidMount() {
-    this.mounted = true;
     try {
       const { jwt, nome, role } = getLocalStorage();
-      this.setState({ jwt, nome, role });
+      this.setState({ jwt, nome, role, mounted: true });
     } catch (errr) {
+      this.setState({ mounted: true });
       clearLocalStorage();
     }
   }
@@ -123,7 +124,7 @@ class App extends React.Component<{}, State> {
   };
 
   renderCliente = (props: any) => {
-    if (!this.mounted) return null;
+    if (!this.state.mounted) return null;
     const { role } = this.state;
     if (role !== CLIENTE) return <Redirect to="/" />;
     return (
@@ -169,7 +170,7 @@ class App extends React.Component<{}, State> {
       })
       .catch(err => {
         this.setState({ registerLoading: false });
-        this.setNotification(err);
+        this.setNotification(err.message);
       });
   };
 
@@ -189,10 +190,6 @@ class App extends React.Component<{}, State> {
   };
 
   renderAdmin = (props: any) => {
-    // const { role } = this.state;
-    // if (role !== ADMIN) {
-    //   return <Redirect to="/" />;
-    // }
     return (
       <pages.Admin
         {...props}
@@ -207,7 +204,7 @@ class App extends React.Component<{}, State> {
 
   renderPrestador = (props: any) => {
     const { role } = this.state;
-    if (!this.mounted) return null;
+    if (!this.state.mounted) return null;
     if (role !== PRESTADOR) return <Redirect to="/" />;
     return (
       <pages.Prestador
