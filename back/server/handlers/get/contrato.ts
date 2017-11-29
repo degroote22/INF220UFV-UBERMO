@@ -1,5 +1,6 @@
 import * as express from "express";
 import * as pgPromise from "pg-promise";
+// import { Endereco } from "../shared/endereco";
 
 interface QueryBody {
   id: number;
@@ -30,6 +31,14 @@ export interface Contrato {
   comentariocliente: string;
   notaprestador: number;
   comentarioprestador: string;
+  //
+  uf: string;
+  cidade: string;
+  bairro: string;
+  logradouro: string;
+  numero: string;
+  complemento: string;
+  cep: string;
 }
 
 const validateParseQuery = (query: QueryRawBody): QueryBody => {
@@ -51,16 +60,21 @@ export default async (
 
     await db
       .one(
-        "SELECT contratado.id, ofertado.valor, ofertado.descricao, ofertado.lat, ofertado.lng, " +
-          "tipo.tipocobranca, tipo.nome, prestador.nome as nomeprestador, prestador.nota as notaglobalprestador, " +
-          "prestador.email as emailprestador, prestador.foto as fotoprestador, " +
-          "contratado.quantidade as quantidade, contratado.datapedido as datapedido, " +
-          "contratado.dataconclusao as dataconclusao, contratado.status as status, contratado.notacliente as notacliente, " +
-          "contratado.comentariocliente as comentariocliente, contratado.notaprestador as notaprestador, " +
-          "contratado.comentarioprestador as comentarioprestador " +
-          "FROM ubermo.tipo, ubermo.ofertado, ubermo.prestador, ubermo.contratado " +
-          "WHERE ofertado.id = contratado.servico AND ofertado.tipo = tipo.id AND ofertado.prestador = prestador.email " +
-          "AND contratado.id = $1 AND contratado.cliente = $2",
+        `SELECT
+          uf, cidade, bairro, logradouro, numero, complemento, cep,
+          contratado.id, ofertado.valor, ofertado.descricao,
+          ofertado.lat, ofertado.lng, tipo.tipocobranca,
+          tipo.nome, prestador.nome as nomeprestador, prestador.nota as notaglobalprestador,
+          prestador.email as emailprestador, prestador.foto as fotoprestador, contratado.quantidade as quantidade,
+          contratado.datapedido as datapedido, contratado.dataconclusao as dataconclusao, contratado.status as status,
+          contratado.notacliente as notacliente, contratado.comentariocliente as comentariocliente, contratado.notaprestador as notaprestador,
+          contratado.comentarioprestador as comentarioprestador
+          FROM ubermo.tipo, ubermo.ofertado, ubermo.prestador, ubermo.contratado, ubermo.enderecocliente
+          WHERE ofertado.id = contratado.servico AND ofertado.tipo = tipo.id
+            AND ofertado.prestador = prestador.email
+            AND contratado.endereco = enderecocliente.id
+            AND contratado.id = $1
+            AND contratado.cliente = $2`,
         [q.id, email]
       )
       .then(response => {

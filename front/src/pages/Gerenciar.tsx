@@ -3,7 +3,8 @@ import {
   ofertadosPorPrestador,
   servicosPorPrestador,
   aceitaServico,
-  finalizaServico
+  finalizaServico,
+  prestador
 } from "../http";
 import {
   Oferta,
@@ -14,6 +15,8 @@ import {
   Servico,
   Response as ServicosResponse
 } from "../../../back/server/handlers/get/servicosPorPrestador";
+
+import { Prestador } from "../../../back/server/handlers/get/prestador";
 import statusMap from "./statusMap";
 import * as Router from "react-router-dom";
 import timeago from "../timeago";
@@ -27,6 +30,7 @@ interface State {
   modalTipo: string;
   notaFinalizar: string;
   comentarioFinalizar: string;
+  nota: number;
 }
 
 const MODAL_ACEITAR = "MODAL_ACEITAR";
@@ -35,6 +39,7 @@ const MODAL_FINALIZAR = "MODAL_FINALIZAR";
 const initialState: State = {
   ofertas: [],
   servicos: [],
+  nota: 1,
   modal: false,
   modalServico: null,
   modalLoading: false,
@@ -49,6 +54,7 @@ const cobrancaMap2 = ["horas", "dias", "unidade"];
 class Gerenciar extends React.Component<
   {
     jwt: string;
+    email: string;
     handleHttpError: (error: any) => void;
   },
   State
@@ -56,6 +62,10 @@ class Gerenciar extends React.Component<
   state = initialState;
 
   componentDidMount() {
+    prestador(this.props.email, this.props.jwt)
+      .then((response: Prestador) => this.setState({ nota: response.nota }))
+      .catch(this.props.handleHttpError);
+
     ofertadosPorPrestador(this.props.jwt)
       .then((response: OfertasResponse) => {
         this.setState({ ofertas: response.ofertas });
@@ -68,6 +78,12 @@ class Gerenciar extends React.Component<
       })
       .catch(this.props.handleHttpError);
   }
+
+  podeCriarMais = () => {
+    return this.state.nota > 3
+      ? this.state.ofertas.length < 5
+      : this.state.ofertas.length < 3;
+  };
 
   renderOfertaCard = (oferta: Oferta) => (
     <div className="column is-4" key={oferta.id}>
@@ -315,6 +331,7 @@ class Gerenciar extends React.Component<
     this.setState({ modalTipo: "", modal: false, modalServico: null });
 
   render() {
+    const Wrapper = this.podeCriarMais() ? Router.Link : "div";
     return [
       <section className="section" key="gerenciar">
         <div className="container">
@@ -324,12 +341,17 @@ class Gerenciar extends React.Component<
                 <h1 className="title">Suas ofertas</h1>
               </div>
               <div className="level-item">
-                <Router.Link to="/prestador/criar" className="button is-link">
-                  <span className="icon">
-                    <i className="fa fa-plus" />
-                  </span>
-                  <span>OFERTAR OUTRO SERVIÇO</span>
-                </Router.Link>
+                <Wrapper to="/prestador/criar">
+                  <button
+                    disabled={!this.podeCriarMais()}
+                    className="button is-link"
+                  >
+                    <span className="icon">
+                      <i className="fa fa-plus" />
+                    </span>
+                    <span>OFERTAR OUTRO SERVIÇO</span>
+                  </button>
+                </Wrapper>
               </div>
             </div>
           </nav>

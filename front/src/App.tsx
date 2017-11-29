@@ -22,6 +22,7 @@ interface State {
   notificationText: string;
   nome: string;
   jwt: string;
+  email: string;
   role: string;
   registerLoading: boolean;
   mounted: boolean;
@@ -33,6 +34,7 @@ const initialState: State = {
   notification: false,
   notificationText: "",
   nome: "",
+  email: "",
   jwt: "",
   role: DESLOGADO,
   mounted: false
@@ -42,8 +44,8 @@ class App extends React.Component<{}, State> {
   state = initialState;
   componentDidMount() {
     try {
-      const { jwt, nome, role } = getLocalStorage();
-      this.setState({ jwt, nome, role, mounted: true });
+      const { jwt, nome, role, email } = getLocalStorage();
+      this.setState({ email, jwt, nome, role, mounted: true });
     } catch (errr) {
       this.setState({ mounted: true });
       clearLocalStorage();
@@ -74,9 +76,9 @@ class App extends React.Component<{}, State> {
           notificationText: JSON.stringify(msg)
         });
 
-  login = (jwt: string, nome: string, role: string) => {
-    this.setState({ jwt, nome, role });
-    setLocalStorage(jwt, nome, role);
+  login = (jwt: string, nome: string, role: string, email: string) => {
+    this.setState({ jwt, nome, role, email });
+    setLocalStorage(jwt, nome, role, email);
   };
 
   onLogoutClick = () => {
@@ -94,7 +96,7 @@ class App extends React.Component<{}, State> {
     fn()
       .then(r => {
         this.setState({ loginLoading: false });
-        this.login(r.jwt, r.nome, role);
+        this.login(r.jwt, r.nome, role, email);
       })
       .catch(err => {
         this.setNotification("Erro no login. Confira e-mail e senha.");
@@ -153,7 +155,7 @@ class App extends React.Component<{}, State> {
     cadastraCliente(payload)
       .then(r => {
         this.setState({ registerLoading: false });
-        this.login(r.jwt, r.nome, CLIENTE);
+        this.login(r.jwt, r.nome, CLIENTE, payload.email);
       })
       .catch(err => {
         this.setNotification(err.message);
@@ -166,7 +168,7 @@ class App extends React.Component<{}, State> {
     cadastraPrestador(payload)
       .then(r => {
         this.setState({ registerLoading: false });
-        this.login(r.jwt, r.nome, PRESTADOR);
+        this.login(r.jwt, r.nome, PRESTADOR, payload.email);
       })
       .catch(err => {
         this.setState({ registerLoading: false });
@@ -212,6 +214,7 @@ class App extends React.Component<{}, State> {
         nome={this.state.nome}
         onLogoutClick={this.onLogoutClick}
         jwt={this.state.jwt}
+        email={this.state.email}
         handleHttpError={this.handleHttpError}
       />
     );

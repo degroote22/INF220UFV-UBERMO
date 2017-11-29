@@ -22,13 +22,18 @@ export interface RequestBody {
   cartao: CartaoCredito;
   endereco: Endereco;
   email: string;
+  nomeendereco: string;
 }
 
 const validateBody = (body: RequestBody) => {
-  const { nome, telefone, senha, email } = body;
+  const { nome, telefone, senha, email, nomeendereco } = body;
 
   validaEmail(email);
   validaSenha(senha);
+
+  if (typeof nomeendereco !== "string") {
+    throw Error("Nome do endereço inválido");
+  }
 
   if (typeof nome !== "string" || nome.length < 3 || nome.length > 100)
     throw Error("Nome inválido");
@@ -66,22 +71,23 @@ export default (
   const db: pgPromise.IDatabase<{}> = res.locals.db;
   const body: RequestBody = req.body;
 
-  const { endereco, cartao } = body;
+  const { endereco, cartao, nomeendereco } = body;
   db
     .tx(t =>
       t
         .none(
-          "INSERT INTO UBERMO.CLIENTE(nome, telefone, nota, email, hash) " +
-            "VALUES ($1, $2, $3, $4, crypt($5, gen_salt('bf')))",
-          [body.nome, body.telefone, 0, body.email, body.senha]
+          "INSERT INTO UBERMO.CLIENTE(nome, telefone, nota, email, hash, avaliacoes) " +
+            "VALUES ($1, $2, $3, $4, crypt($5, gen_salt('bf')), $6)",
+          [body.nome, body.telefone, 0, body.email, body.senha, 0]
         )
         .then(() =>
           t.batch([
             t.none(
               "INSERT INTO UBERMO.ENDERECOCLIENTE " +
-                "(cliente, uf, cidade, bairro, logradouro, numero, complemento, cep) " +
-                "values ($1, $2, $3, $4, $5, $6, $7, $8)",
+                "(nome, cliente, uf, cidade, bairro, logradouro, numero, complemento, cep) " +
+                "values ($1, $2, $3, $4, $5, $6, $7, $8, $9)",
               [
+                nomeendereco,
                 body.email,
                 endereco.uf,
                 endereco.cidade,
@@ -119,6 +125,7 @@ export default (
       res.json(response);
     })
     .catch(err => {
+      console.log(err);
       if (err.code === "23505" /* Unique violation */) {
         res.status(500);
         res.json({ message: "E-mail já cadastrado" });

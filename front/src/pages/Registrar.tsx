@@ -10,39 +10,13 @@ import {
   RequestBody as BodyPrestador,
   ContaBancaria
 } from "../../../back/server/handlers/post/cadastraPrestador";
-
+import TextInput from "./TextInput";
 const { Link } = rtr;
 
 const STEP0 = 0;
 const STEP1 = 1;
 const STEP2 = 2;
 const STEP3 = 3;
-
-class TextInput extends React.Component<{
-  label: string;
-  value: any;
-  onChange: (value: any) => void;
-  type: string;
-  disabled: boolean;
-}> {
-  handleChange = (event: any) => this.props.onChange(event.target.value);
-  render() {
-    return (
-      <div className="field">
-        <label className="label">{this.props.label}</label>
-        <div className="control">
-          <input
-            className="input"
-            type={this.props.type}
-            value={this.props.value}
-            onChange={this.handleChange}
-            disabled={this.props.disabled}
-          />
-        </div>
-      </div>
-    );
-  }
-}
 
 interface State {
   step: number;
@@ -68,12 +42,13 @@ const initialCartao: CartaoCredito = {
 };
 
 const initalCliente: BodyCliente = {
-  nome: "Cliente2",
+  nome: "Carlitos Tevez",
   email: "cliente2@cliente.com",
   telefone: "78944561",
   senha: "cliente",
   cartao: initialCartao,
-  endereco: initalEndereco
+  endereco: initalEndereco,
+  nomeendereco: "Escritório"
 };
 
 const initialConta: ContaBancaria = {
@@ -87,7 +62,7 @@ const initialPrestador: BodyPrestador = {
   email: "prestador2@prestador.com",
   telefone: "12341234",
   senha: "prestador",
-  foto: "lorempixel.com/400/400",
+  foto: "https://lorempixel.com/400/400",
   conta: initialConta,
   endereco: initalEndereco
 };
@@ -394,6 +369,14 @@ class Registrar extends React.Component<
     this.changePayloadEndereco("complemento", value);
   changeCep = (value: string) => this.changePayloadEndereco("cep", value);
 
+  changeNomeEndereco = (value: string) =>
+    this.setState(state => ({
+      payloadCliente: {
+        ...state.payloadCliente,
+        nomeendereco: value
+      }
+    }));
+
   renderEndereco = (disabled: boolean) => {
     const data: Endereco =
       this.state.role === roles.CLIENTE
@@ -403,11 +386,19 @@ class Registrar extends React.Component<
       <section className="section">
         <div className="container">
           <h1 className="title has-text-centered">Endereço</h1>
-
           <div className="columns">
             <div className="column is-3" />
             <div className="column is-6">
               <div className="box">
+                {this.state.role === roles.CLIENTE && (
+                  <TextInput
+                    label="Nome do endereço"
+                    value={this.state.payloadCliente.nomeendereco}
+                    onChange={this.changeNomeEndereco}
+                    type="text"
+                    disabled={disabled}
+                  />
+                )}
                 <TextInput
                   label="Unidade Federativa"
                   value={data.uf}

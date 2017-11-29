@@ -1,10 +1,11 @@
 import * as express from "express";
 import * as pgPromise from "pg-promise";
-import { PEDIDO } from "../shared/status";
+import * as status from "../shared/status";
 
 export interface RequestBody {
   idservico: number;
   quantidade: number;
+  endereco: number;
 }
 
 export interface Response {
@@ -12,8 +13,9 @@ export interface Response {
 }
 
 const validateBody = (body: RequestBody) => {
-  const { idservico } = body;
+  const { idservico, endereco } = body;
   if (typeof idservico !== "number") throw Error("Serviço inválido");
+  if (typeof endereco !== "number") throw Error("Endereco inválido");
 };
 
 export default async (
@@ -29,19 +31,30 @@ export default async (
     const email = res.locals.email;
 
     const { idservico } = body;
-    const handleResponse = (id: number) => {
-      const response: Response = { id };
-      res.json(response);
-    };
+
+    // Verificar se o endereço eh do cliente q tá mandando o pedido
+    const { clienteemail } = await db.one(
+      `
+    SELECT enderecocliente.cliente as clienteemail
+    FROM ubermo.enderecocliente
+    WHERE enderecocliente.id = $1`,
+      [body.endereco]
+    );
+
+    console.log(clienteemail);
+
+    if (clienteemail !== email) {
+      throw Error("Endereço inválido inválido");
+    }
 
     const { id } = await db.one(
       "INSERT INTO ubermo.contratado " +
-        "(servico, cliente, quantidade, datapedido, status) " +
-        "VALUES ($1, $2, $3, current_timestamp, $4) RETURNING id",
-      [idservico, email, body.quantidade, PEDIDO]
+        "(servico, cliente, quantidade, datapedido, status, endereco) " +
+        "VALUES ($1, $2, $3, current_timestamp, $4, $5) RETURNING id",
+      [idservico, email, body.quantidade, status.PEDIDO, body.endereco]
     );
-
-    handleResponse(id);
+    const response: Response = { id };
+    res.json(response);
   } catch (err) {
     res.locals.handleError(err);
   }

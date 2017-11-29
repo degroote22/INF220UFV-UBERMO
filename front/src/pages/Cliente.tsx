@@ -12,6 +12,7 @@ import { TipoOfertas } from "../../../back/server/handlers/get/tiposOfertados";
 import * as Router from "react-router-dom";
 import ServicosPorTipo from "./ServicosPorTipo";
 import Servico from "./Servico";
+import NovoEndereco from "./NovoEndereco";
 import Contrato from "./Contrato";
 import { Response as FincancaResponse } from "../../../back/server/handlers/get/financaCliente";
 import statusMap from "./statusMap";
@@ -94,7 +95,7 @@ class Cliente extends React.Component<
       onClick={this.refreshData}
       to={"/cliente/dados"}
       style={{ marginRight: 32 }}
-      className="button is-pulled-right is-outlined has-text-primary	 is-large"
+      className="button is-outlined has-text-primary is-large"
     >
       MEUS DADOS
     </Router.Link>
@@ -104,7 +105,7 @@ class Cliente extends React.Component<
     <Router.Link
       to={"/cliente"}
       style={{ marginRight: 32 }}
-      className="button is-pulled-right is-outlined has-text-primary	 is-large"
+      className="button is-outlined has-text-primary is-large"
     >
       CONTRATAR SERVIÇOS
     </Router.Link>
@@ -113,7 +114,7 @@ class Cliente extends React.Component<
     <Router.Link
       to={"/cliente"}
       style={{ marginRight: 32 }}
-      className="button is-pulled-right is-outlined has-text-primary	 is-large"
+      className="button is-outlined has-text-primary is-large"
     >
       VOLTAR
     </Router.Link>
@@ -124,17 +125,11 @@ class Cliente extends React.Component<
       <div className="hero-body">
         <div className="container">
           <div className="columns">
-            <div className="column">
+            <div className="column has-text-centered-mobile">
               <h1 className="title">UBERmo</h1>
               <h2 className="subtitle">Logado como: {this.props.nome}</h2>
             </div>
-            <div className="column">
-              <a
-                onClick={this.props.onLogoutClick}
-                className="button is-pulled-right is-outlined has-text-primary	 is-large"
-              >
-                SAIR
-              </a>
+            <div className="column has-text-right">
               <Router.Switch>
                 <Router.Route
                   path="/cliente/dados"
@@ -150,6 +145,12 @@ class Cliente extends React.Component<
                   component={this.renderVoltarBotao}
                 />
               </Router.Switch>
+              <a
+                onClick={this.props.onLogoutClick}
+                className="button is-outlined has-text-primary is-large"
+              >
+                SAIR
+              </a>
             </div>
           </div>
         </div>
@@ -222,6 +223,7 @@ class Cliente extends React.Component<
       </div>
     </div>
   );
+
   modalCallback: any;
   openModal = (s: ModalServico, cb?: any) => {
     if (cb) {
@@ -380,7 +382,6 @@ class Cliente extends React.Component<
   );
 
   renderDados = () => {
-    console.log(this.state.porCliente);
     return (
       <div className="container" key="dados">
         <section className="section">
@@ -452,36 +453,38 @@ class Cliente extends React.Component<
     />
   );
 
+  renderRedirect = () => <Router.Redirect to="/cliente" />;
+
+  renderCriarEndereco = (props: any) => (
+    <NovoEndereco
+      {...props}
+      handleHttpError={this.props.handleHttpError}
+      jwt={this.props.jwt}
+    />
+  );
+
   render() {
     return [
       this.renderHero(),
       this.renderModal(),
-      <Router.Route
-        exact
-        path="/cliente"
-        render={this.renderPesquisar}
-        key="comprar"
-      />,
-      <Router.Route
-        path="/cliente/dados"
-        render={this.renderDados}
-        key="dados"
-      />,
-      <Router.Route
-        path="/cliente/tipo/:id"
-        render={this.renderServicosPorTipo}
-        key="tipos"
-      />,
-      <Router.Route
-        path="/cliente/servico/:id"
-        render={this.renderServico}
-        key="servico"
-      />,
-      <Router.Route
-        path="/cliente/contrato/:id"
-        render={this.renderContrato}
-        key="contrato"
-      />
+      <Router.Switch key="sw">
+        <Router.Route exact path="/cliente" render={this.renderPesquisar} />
+        <Router.Route path="/cliente/dados" render={this.renderDados} />
+        <Router.Route
+          path="/cliente/criarendereco/:id"
+          render={this.renderCriarEndereco}
+        />
+        <Router.Route
+          path="/cliente/tipo/:id"
+          render={this.renderServicosPorTipo}
+        />
+        <Router.Route path="/cliente/servico/:id" render={this.renderServico} />
+        <Router.Route
+          path="/cliente/contrato/:id"
+          render={this.renderContrato}
+        />
+        <Router.Route render={this.renderRedirect} />
+      </Router.Switch>
     ];
   }
 }

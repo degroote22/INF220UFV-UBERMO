@@ -17,6 +17,7 @@ import { Request as AceitaServicoBody } from "../../../back/server/handlers/post
 import { Request as FinalizaServicoBody } from "../../../back/server/handlers/post/finalizaServico";
 import { Request as ClienteAvaliaBody } from "../../../back/server/handlers/post/clienteAvalia";
 import { RequestBody as PrestadorOfereceBody } from "../../../back/server/handlers/post/ofereceServico";
+import { Request as criarEnderecoRequest } from "../../../back/server/handlers/post/criarEndereco";
 
 export const loginAdmin = (email: string, senha: string) => {
   const body: RequestBodyLogin = {
@@ -26,6 +27,14 @@ export const loginAdmin = (email: string, senha: string) => {
   return postInjected("loginadmin", body);
 };
 
+export const criarEndereco = (body: criarEnderecoRequest, jwt: string) =>
+  postInjected("criarendereco", body, jwt);
+
+export const enderecos = (jwt: string) => getInjected("enderecos", jwt);
+
+export const prestador = (email: string, jwt: string) =>
+  getInjected("prestador?email=" + email, jwt);
+
 export const ofereceServico = (body: PrestadorOfereceBody, jwt: string) =>
   postInjected("ofereceservico", body, jwt);
 
@@ -34,6 +43,8 @@ export const clienteAvalia = (body: ClienteAvaliaBody, jwt: string) =>
 
 export const financaPrestador = (jwt: string) =>
   getInjected("financaprestador", jwt);
+
+export const financaAdmin = (jwt: string) => getInjected("financaadmin", jwt);
 
 export const finalizaServico = (body: FinalizaServicoBody, jwt: string) =>
   postInjected("finalizaservico", body, jwt);

@@ -10,6 +10,7 @@ class Prestador extends React.Component<
     nome: string;
     onLogoutClick: () => void;
     jwt: string;
+    email: string;
     handleHttpError: (error: any) => void;
   },
   {}
@@ -29,7 +30,7 @@ class Prestador extends React.Component<
       style={{ marginRight: 32 }}
       className="button is-pulled-right is-outlined has-text-link	 is-large"
     >
-      MEUS DADOS
+      DADOS FINANCEIROS
     </Router.Link>
   );
 
@@ -93,6 +94,7 @@ class Prestador extends React.Component<
   renderGerenciar = () => (
     <Gerenciar
       jwt={this.props.jwt}
+      email={this.props.email}
       handleHttpError={this.props.handleHttpError}
     />
   );

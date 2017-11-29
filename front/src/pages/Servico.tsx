@@ -1,6 +1,7 @@
 import * as React from "react";
-import { servico, requisitaServico } from "../http";
+import { servico, requisitaServico, enderecos } from "../http";
 import { Servico as Response } from "../../../back/server/handlers/get/servico";
+import { EnderecoId } from "../../../back/server/handlers/get/enderecos";
 import * as Router from "react-router-dom";
 import ServicoHeader from "./ServicoHeader";
 
@@ -26,6 +27,9 @@ interface State {
   requisitado: number;
   loadingContrato: boolean;
   cliente: boolean;
+  endereco: string;
+  enderecos: EnderecoId[];
+  id: number;
 }
 
 const initialState: State = {
@@ -35,7 +39,10 @@ const initialState: State = {
   quantidade: 1,
   loadingContrato: false,
   requisitado: 0,
-  cliente: false
+  cliente: false,
+  endereco: "0",
+  enderecos: [],
+  id: 0
 };
 
 const tempoCobranca = ["(horas)", "(dias)", ""];
@@ -49,7 +56,14 @@ class Servico extends React.Component<
   state = initialState;
   componentDidMount() {
     const id = parseInt((this.props as any).match.params.id, 10);
+    this.setState(() => ({ id }));
+
     const cliente = (this.props as any).match.url.substring(1, 8) === "cliente";
+
+    enderecos(this.props.jwt).then((response: EnderecoId[]) => {
+      this.setState({ enderecos: response, endereco: String(response[0].id) });
+    });
+
     servico(id)
       .then((response: Response) => {
         this.setState({ data: response, loaded: true, cliente });
@@ -69,7 +83,8 @@ class Servico extends React.Component<
     requisitaServico(
       {
         quantidade: this.state.quantidade,
-        idservico: this.state.data.id
+        idservico: this.state.data.id,
+        endereco: parseInt(this.state.endereco, 10)
       },
       this.props.jwt
     )
@@ -82,53 +97,86 @@ class Servico extends React.Component<
       });
   };
 
-  renderContratarFields = () => (
-    <nav className="level">
-      <div className="level-left">
-        <div className="level-item">
-          <p className="subtitle is-5">
-            Quantidade: {tempoCobranca[this.state.data.tipocobranca]}
-          </p>
-        </div>
-        <div className="level-item">
-          <input
-            className="input"
-            type="number"
-            placeholder="1"
-            disabled={this.state.data.tipocobranca === 2 /*Atividade */}
-            value={this.state.quantidade}
-            onChange={this.changeQuantidade}
-          />
-        </div>
-        <div className="level-item">
-          <p className="subtitle is-5">
-            R${(this.state.quantidade * this.state.data.valor / 100).toFixed(2)}
-          </p>
-        </div>
-      </div>
+  onChangeEndereco = (event: any) =>
+    this.setState({ endereco: event.target.value });
 
-      <div className="level-right">
-        <p className="level-item">
-          <button
-            disabled={this.state.loadingContrato}
-            className="button is-large is-success"
-            onClick={this.onConfirmaClick}
-          >
-            Confirmar
-          </button>
-        </p>
-        <p className="level-item">
-          <button
-            disabled={this.state.loadingContrato}
-            className="button is-large is-danger"
-            onClick={this.closeContratar}
-          >
-            Cancelar
-          </button>
-        </p>
+  renderContratarFields = () => (
+    <div className="columns">
+      <div className="column is-6">
+        <nav className="level is-mobile">
+          <div className="level-item">
+            <p className="subtitle is-5">
+              Quantidade: {tempoCobranca[this.state.data.tipocobranca]}
+            </p>
+          </div>
+          <div className="level-item">
+            <input
+              style={{ maxWidth: 128 }}
+              className="input"
+              type="number"
+              placeholder="1"
+              disabled={this.state.data.tipocobranca === 2 /*Atividade */}
+              value={this.state.quantidade}
+              onChange={this.changeQuantidade}
+            />
+          </div>
+          <div className="level-item">
+            <p className="subtitle is-5">
+              R${(this.state.quantidade * this.state.data.valor / 100).toFixed(
+                2
+              )}
+            </p>
+          </div>
+        </nav>
+        <nav className="level is-mobile">
+          <div className="level-item">
+            <p className="subtitle is-5">Endereço:</p>
+          </div>
+
+          <div className="level-item">
+            <div className="select is-fullwidth">
+              <select
+                value={this.state.endereco}
+                onChange={this.onChangeEndereco}
+              >
+                {this.state.enderecos.map(endereco => (
+                  <option value={endereco.id} key={endereco.id}>
+                    {endereco.nome}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className="level-item">
+            <Router.Link to={"/cliente/criarendereco/" + this.state.id}>
+              <button className="button is-link">NOVO ENDEREÇO</button>
+            </Router.Link>
+          </div>
+        </nav>
+        <nav className="level is-mobile">
+          <div className="level-item">
+            <button
+              disabled={this.state.loadingContrato}
+              className="button is-large is-success"
+              onClick={this.onConfirmaClick}
+            >
+              CONFIRMAR
+            </button>
+          </div>
+          <div className="level-item">
+            <button
+              disabled={this.state.loadingContrato}
+              className="button is-large is-danger"
+              onClick={this.closeContratar}
+            >
+              CANCELAR
+            </button>
+          </div>
+        </nav>
       </div>
-    </nav>
+    </div>
   );
+
   ref: any;
 
   getWidth = (): number => {

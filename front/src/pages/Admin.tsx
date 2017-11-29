@@ -1,6 +1,52 @@
 import * as React from "react";
 import { ADMIN } from "../roles";
-import { cadastraTipo } from "../http";
+import { cadastraTipo, financaAdmin } from "../http";
+
+const makeMoney = (valor: number) => (valor / 100 * 0.05).toFixed(2);
+
+const FinancaBox = (props: { texto: string; valor: number }) => (
+  <div className="column is-3">
+    <div className="box">
+      <p className="title">{props.texto}</p>
+      <p className="subtitle">R$ {makeMoney(props.valor)}</p>
+    </div>
+  </div>
+);
+
+class Financa extends React.Component<
+  {
+    jwt: string;
+    handleHttpError: (error: any) => void;
+  },
+  { hoje: number; semana: number; mes: number; ano: number }
+> {
+  state = {
+    hoje: 0,
+    semana: 0,
+    mes: 0,
+    ano: 0
+  };
+  componentDidMount() {
+    financaAdmin(this.props.jwt)
+      .then(response => this.setState(response))
+      .catch(this.props.handleHttpError);
+  }
+
+  render() {
+    return [
+      <div className="container" key="a">
+        <h3 className="title">Lucros do UBERmo</h3>
+      </div>,
+      <hr key="b" />,
+      <div className="columns" key="c">
+        <FinancaBox texto="Hoje" valor={this.state.hoje} />
+        <FinancaBox texto="Semana" valor={this.state.semana} />
+        <FinancaBox texto="Mês" valor={this.state.mes} />
+        <FinancaBox texto="Ano" valor={this.state.ano} />
+      </div>
+    ];
+  }
+}
 
 class Admin extends React.Component<
   {
@@ -30,6 +76,7 @@ class Admin extends React.Component<
     success: false,
     successTimer: 0
   };
+
   renderHero = () => (
     <section className="hero is-warning" key="Hero">
       <div className="hero-body">
@@ -149,8 +196,18 @@ class Admin extends React.Component<
 
   renderCadastraTipo = () => {
     return (
-      <section className="section" key="tipo">
-        <div className="container">
+      <div className="container" key="tipo">
+        <section className="section">
+          <Financa
+            jwt={this.props.jwt}
+            handleHttpError={this.props.handleHttpError}
+          />
+        </section>
+        <section className="section">
+          <div className="container">
+            <h3 className="title">Criar tipo de serviço</h3>
+          </div>
+          <hr />
           {this.state.success && (
             <div className="notification is-success">
               <p className="title">Tipo criado com successo!</p>
@@ -198,8 +255,8 @@ class Admin extends React.Component<
               Criar tipo
             </button>
           </div>
-        </div>
-      </section>
+        </section>
+      </div>
     );
   };
 

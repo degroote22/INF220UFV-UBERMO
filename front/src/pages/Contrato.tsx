@@ -27,7 +27,15 @@ const initialServico = {
   notacliente: 0, //
   comentariocliente: "", //
   notaprestador: 0, //
-  comentarioprestador: "" //
+  comentarioprestador: "", //
+  //
+  uf: "",
+  cidade: "",
+  bairro: "",
+  logradouro: "",
+  numero: "",
+  complemento: "",
+  cep: ""
 };
 
 interface State {
@@ -84,28 +92,39 @@ class Contratar extends React.Component<
     );
   };
 
-  renderBotao = () => {
+  renderAvaliacao = () => {
     if (this.state.servico.status === 0 || this.state.servico.status === 1)
       return null;
 
     return this.state.servico.notaprestador &&
       this.state.servico.status === 2 ? (
-      <div className="box" key="c">
-        {this.state.servico.comentarioprestador !== "" && (
-          <h2 className="is-size-4">
-            "{this.state.servico.comentarioprestador}"
-          </h2>
-        )}
-        <h1 className="title">{this.state.servico.notaprestador} pontos</h1>
-        <h1 className="subtitle">você avaliou</h1>
-      </div>
+      [
+        <div className="box" key="a">
+          {this.state.servico.comentarioprestador !== "" && (
+            <h2 className="is-size-4">
+              "{this.state.servico.comentarioprestador}"
+            </h2>
+          )}
+          <h1 className="title">{this.state.servico.notaprestador} pontos</h1>
+          <h1 className="subtitle">você avaliou</h1>
+        </div>,
+        <div className="box " key="b">
+          {this.state.servico.comentariocliente !== "" && (
+            <h2 className="is-size-4">
+              "{this.state.servico.comentariocliente}"
+            </h2>
+          )}
+          <h1 className="title">{this.state.servico.notacliente} pontos</h1>
+          <h1 className="subtitle">você foi avaliado</h1>
+        </div>
+      ]
     ) : (
       <div className="box is-shadowless" key="avalie">
         <button
           className="button is-large is-fullwidth is-success"
           onClick={this.onAvaliarClick}
         >
-          AVALIAR O PRESTADOR
+          AVALIE O PRESTADOR E VEJA SUA AVALIAÇÃO
         </button>
       </div>
     );
@@ -128,6 +147,11 @@ class Contratar extends React.Component<
             nomeprestador={this.state.servico.nomeprestador}
             notaprestador={this.state.servico.notaglobalprestador}
           />
+          <div className="box is-shadowless">
+            <h1 className="title">Status</h1>
+            <h1 className="subtitle">{statusMap[this.state.servico.status]}</h1>
+          </div>
+          <hr />
           <div className="container">
             <div className="columns">
               <div className="column">
@@ -155,39 +179,48 @@ class Contratar extends React.Component<
                 </div>
               </div>
 
-              <div className="column">
-                <div className="box is-shadowless">
-                  <h1 className="title">Data da conclusão</h1>
-                  <h2 className="subtitle">
-                    {timeago(this.state.servico.dataconclusao)}
-                  </h2>
+              {this.state.servico.dataconclusao && (
+                <div className="column">
+                  <div className="box is-shadowless">
+                    <h1 className="title">Data da conclusão</h1>
+                    <h2 className="subtitle">
+                      {timeago(this.state.servico.dataconclusao)}
+                    </h2>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
-
           <hr />
           <div className="box is-shadowless">
-            <h1 className="title">{statusMap[this.state.servico.status]}</h1>
-            <h1 className="subtitle">status da transação</h1>
-          </div>
-
-          {this.renderBotao()}
-          {this.state.servico.notacliente && (
-            <div className="box " key="b">
-              {this.state.servico.comentariocliente !== "" && (
-                <h2 className="is-size-4">
-                  "{this.state.servico.comentariocliente}"
-                </h2>
+            <h1 className="title">Endereço do cliente</h1>
+            <div className="columns is-multiline">
+              {this.renderGeoInfo("UF", this.state.servico.uf)}
+              {this.renderGeoInfo("Cidade", this.state.servico.cidade)}
+              {this.renderGeoInfo("Bairro", this.state.servico.bairro)}
+              {this.renderGeoInfo("Logradouro", this.state.servico.logradouro)}
+              {this.renderGeoInfo("Número", this.state.servico.numero)}
+              {this.renderGeoInfo(
+                "Complemento",
+                this.state.servico.complemento
               )}
-              <h1 className="title">{this.state.servico.notacliente} pontos</h1>
-              <h1 className="subtitle">você foi avaliado</h1>
+              {this.renderGeoInfo("CEP", this.state.servico.cep)}
             </div>
-          )}
+          </div>
+          <hr />
+
+          {this.renderAvaliacao()}
         </section>
       </div>
     );
   }
+
+  renderGeoInfo = (label: string, value: string) => (
+    <div className="column is-4">
+      <h1 className="is-size-4">{label}</h1>
+      <h2 className="is-size-6">{value}</h2>
+    </div>
+  );
 }
 
 export default Contratar;

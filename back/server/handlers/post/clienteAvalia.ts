@@ -34,10 +34,11 @@ export default async (
     const db: pgPromise.IDatabase<{}> = res.locals.db;
     const email = res.locals.email;
 
-    const { dbemail, status, notaprestador } = await db.one(
-      `SELECT contratado.status, contratado.cliente as dbemail, contratado.notaprestador
-    FROM ubermo.contratado
-    WHERE contratado.id = $1`,
+    const { dbemail, status, notaprestador, emailprestador } = await db.one(
+      `SELECT contratado.status, contratado.cliente as dbemail,
+        contratado.notaprestador, ofertado.prestador as emailprestador
+        FROM ubermo.contratado, ubermo.ofertado
+        WHERE contratado.id = $1 AND contratado.servico = ofertado.id`,
       [body.id]
     );
 
@@ -46,11 +47,21 @@ export default async (
     }
 
     await db
-      .none(
-        `UPDATE ubermo.contratado
-      SET status = 2, notaprestador = $1, comentarioprestador = $2
-      WHERE id = $3`,
-        [body.notaprestador, body.comentarioprestador, body.id]
+      .tx(t =>
+        t.batch([
+          t.none(
+            `UPDATE ubermo.contratado
+            SET status = 2, notaprestador = $1, comentarioprestador = $2
+            WHERE id = $3`,
+            [body.notaprestador, body.comentarioprestador, body.id]
+          ),
+          t.none(
+            `UPDATE ubermo.prestador
+            SET nota = (prestador.nota * prestador.avaliacoes + $1)/(prestador.avaliacoes+1),
+            avaliacoes = prestador.avaliacoes + 1 WHERE prestador.email = $2`,
+            [body.notaprestador, emailprestador]
+          )
+        ])
       )
       .then(() => {
         const response: Response = { id: body.id };

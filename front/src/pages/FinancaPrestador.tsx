@@ -24,7 +24,9 @@ const unidadesMap = ["horas", "dias", "unidades"];
 
 const getSum = (arr: Report[]) =>
   (
-    arr.reduce((prev, curr) => prev + curr.quantidade * curr.valor, 0) / 100
+    arr.reduce((prev, curr) => prev + curr.quantidade * curr.valor, 0) /
+    100 *
+    0.95
   ).toFixed(2);
 
 class FinancaPrestador extends React.Component<
@@ -55,7 +57,7 @@ class FinancaPrestador extends React.Component<
         <th>Nome</th>
         <th>Preço</th>
         <th>Unidades</th>
-        <th>Total</th>
+        <th>Total (-5%)</th>
       </tr>
     </thead>
   );
@@ -68,7 +70,7 @@ class FinancaPrestador extends React.Component<
       <td>
         {r.quantidade} {unidadesMap[r.tipocobranca]}
       </td>
-      <td>R${(r.valor * r.quantidade / 100).toFixed(2)}</td>
+      <td>R${(r.valor * r.quantidade / 100 * 0.95).toFixed(2)}</td>
     </tr>
   );
 
@@ -77,28 +79,30 @@ class FinancaPrestador extends React.Component<
       <section className="section" key="gerenciar">
         <div className="container">
           <h1 className="title">Hoje</h1>
-          <h1 className="subtitle">Total: R${getSum(this.state.hoje)}</h1>
+          <h1 className="subtitle">Total (-5%): R${getSum(this.state.hoje)}</h1>
           <table className="table is-fullwidth">
             {this.renderTableHead()}
             <tbody>{this.state.hoje.map(this.renderTableRow)}</tbody>
           </table>
           <hr />
           <h1 className="title">Semana</h1>
-          <h1 className="subtitle">Total: R${getSum(this.state.semana)}</h1>
+          <h1 className="subtitle">
+            Total (-5%): R${getSum(this.state.semana)}
+          </h1>
           <table className="table is-fullwidth">
             {this.renderTableHead()}
             <tbody>{this.state.semana.map(this.renderTableRow)}</tbody>
           </table>
           <hr />
           <h1 className="title">Mês</h1>
-          <h1 className="subtitle">Total: R${getSum(this.state.mes)}</h1>
+          <h1 className="subtitle">Total (-5%): R${getSum(this.state.mes)}</h1>
           <table className="table is-fullwidth">
             {this.renderTableHead()}
             <tbody>{this.state.mes.map(this.renderTableRow)}</tbody>
           </table>
           <hr />
           <h1 className="title">Ano</h1>
-          <h1 className="subtitle">Total: R${getSum(this.state.ano)}</h1>
+          <h1 className="subtitle">Total (-5%): R${getSum(this.state.ano)}</h1>
           <table className="table is-fullwidth">
             {this.renderTableHead()}
             <tbody>{this.state.ano.map(this.renderTableRow)}</tbody>

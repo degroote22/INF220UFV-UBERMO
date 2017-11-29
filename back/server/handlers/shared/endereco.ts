@@ -1,11 +1,11 @@
 export interface Endereco {
-  uf: String;
-  cidade: String;
-  bairro: String;
-  logradouro: String;
-  numero: String;
-  complemento: String;
-  cep: String;
+  uf: string;
+  cidade: string;
+  bairro: string;
+  logradouro: string;
+  numero: string;
+  complemento: string;
+  cep: string;
 }
 
 export const validateEndereco = (end: Endereco) => {

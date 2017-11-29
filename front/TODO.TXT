@@ -1,18 +1,5 @@
-CLIENTE:
-  [x] ver contrato
-  [x] dar nota pro servico
-
-ADMIN:
-  [x] login
-  [x] criar tipo
-
-PRESTADOR:
-  [x] finalizar servico
-  [x] aceitar servico
-  [x] financa prestador
-  [ ] oferecer servico
-
-DEPLOY:
-  [ ] banco de dados
-  [ ] api
-  [ ] front-end
+deploy:
+  [ ] git
+  [ ] sql
+  [ ] back
+  [ ] front

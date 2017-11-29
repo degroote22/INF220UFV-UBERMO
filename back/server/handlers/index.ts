@@ -10,6 +10,7 @@ import clientesMaisContratacoes from "./get/clientesMaisContratacoes";
 import servicosMaisContratados from "./get/servicosMaisContratados";
 import financaCliente from "./get/financaCliente";
 import financaPrestador from "./get/financaPrestador";
+import financaAdmin from "./get/financaAdmin";
 import tipos from "./get/tipos";
 import tiposOfertados from "./get/tiposOfertados";
 import servicosPorTipo from "./get/servicosPorTipo";
@@ -20,6 +21,9 @@ import servicosPorPrestador from "./get/servicosPorPrestador";
 import aceitaServico from "./post/aceitaServico";
 import finalizaServico from "./post/finalizaServico";
 import clienteAvalia from "./post/clienteAvalia";
+import prestador from "./get/prestador";
+import enderecos from "./get/enderecos";
+import criarEndereco from "./post/criarEndereco";
 
 export default {
   cadastraCliente,
@@ -36,6 +40,7 @@ export default {
   servicosMaisContratados,
   financaCliente,
   financaPrestador,
+  financaAdmin,
   tipos,
   servicosPorTipo,
   servico,
@@ -45,5 +50,8 @@ export default {
   aceitaServico,
   finalizaServico,
   clienteAvalia,
-  tiposOfertados
+  tiposOfertados,
+  prestador,
+  enderecos,
+  criarEndereco
 };

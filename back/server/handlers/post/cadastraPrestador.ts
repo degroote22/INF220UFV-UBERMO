@@ -93,9 +93,9 @@ export default (
     .tx(t =>
       t
         .none(
-          "INSERT INTO UBERMO.PRESTADOR (nome, telefone, nota, foto, email, hash) " +
-            "VALUES ($1, $2, $3, $4, $5, crypt($6, gen_salt('bf')))",
-          [body.nome, body.telefone, 0, body.foto, body.email, body.senha]
+          "INSERT INTO UBERMO.PRESTADOR (nome, telefone, nota, foto, email, hash, avaliacoes) " +
+            "VALUES ($1, $2, $3, $4, $5, crypt($6, gen_salt('bf')), $7)",
+          [body.nome, body.telefone, 0, body.foto, body.email, body.senha, 0]
         )
         .then(() =>
           t.batch([

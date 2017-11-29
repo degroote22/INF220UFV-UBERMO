@@ -11,7 +11,11 @@ class Layout extends React.Component<
   },
   { tabClient: boolean; email: string; senha: string }
 > {
-  state = { tabClient: true, email: "cliente@cliente.com", senha: "cliente" };
+  state = {
+    tabClient: true,
+    email: "prestador@prestador.com",
+    senha: "prestador"
+  };
 
   clienteClick = () => {
     if (this.props.loginLoading) {

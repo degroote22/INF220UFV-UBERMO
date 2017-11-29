@@ -32,6 +32,7 @@ class ServicoHeader extends React.Component<{
     return [
       <div className="box is-shadowless" key="a">
         <img src={mapurl} />
+        <p className="is-pulled-right is-size-7">Localização do prestador</p>
       </div>,
       <div className="level" key="d">
         <div className="level-left">
@@ -48,11 +49,7 @@ class ServicoHeader extends React.Component<{
           <div className="media">
             <div className="media-left">
               <p className="image is-128x128">
-                <img
-                  width={128}
-                  height={128}
-                  src={"https://" + this.props.fotoprestador}
-                />
+                <img width={128} height={128} src={this.props.fotoprestador} />
               </p>
             </div>
             <div className="media-right" key="c">

@@ -19,7 +19,8 @@ create table ubermo.prestador(
   telefone text not null,
   nota double precision not null,
   foto text not null,
-  hash text not null
+  hash text not null,
+  avaliacoes integer not null
 );
 
 create table ubermo.ofertado(
@@ -55,11 +56,14 @@ create table ubermo.cliente(
   nome text not null,
   telefone text not null,
   nota double precision not null,
-  hash text not null
+  hash text not null,
+  avaliacoes integer not null
 );
 
 create table ubermo.enderecocliente(
-  cliente text primary key references ubermo.cliente(email),
+  id serial primary key,
+  nome text not null,
+  cliente text references ubermo.cliente(email),
   uf text not null,
   cidade text not null,
   bairro text not null,
@@ -81,6 +85,7 @@ create table ubermo.contratado(
   id serial primary key,
   servico serial not null references ubermo.ofertado(id),
   cliente text not null references ubermo.cliente(email),
+  endereco serial not null references ubermo.enderecocliente(id),
   datapedido timestamp not null,
   dataconclusao timestamp,
   quantidade integer,
@@ -101,15 +106,15 @@ begin;
 
 insert into ubermo.admin(nome, email, hash) values ('Admin', 'admin@admin.com', crypt('admin', gen_salt('bf')));
 
-insert into ubermo.cliente(nome, email, hash, telefone, nota) values
-  ('Cliente', 'cliente@cliente.com', crypt('cliente', gen_salt('bf')), '31 98655-2148', 4);
+insert into ubermo.cliente(nome, email, hash, telefone, nota, avaliacoes) values
+  ('Carlos Roberto', 'cliente@cliente.com', crypt('cliente', gen_salt('bf')), '31 98655-2148', 4, 3);
 insert into ubermo.cartao(cliente, nome, numero, anovencimento, mesvencimento) values
   ('cliente@cliente.com', 'Cliente C. Cliente', '7894-2548-6245-3501', 22, 05);
-insert into ubermo.enderecocliente(cliente, uf, cidade, bairro, logradouro, numero, complemento, cep) values
-  ('cliente@cliente.com', 'Minas Gerais', 'Viçosa', 'Centro', 'Av. PH Rolfs', '183', 'Apto 302', '36570-000');
+insert into ubermo.enderecocliente(nome, cliente, uf, cidade, bairro, logradouro, numero, complemento, cep) values
+  ('Casa', 'cliente@cliente.com', 'Minas Gerais', 'Viçosa', 'Centro', 'Av. PH Rolfs', '183', 'Apto 302', '36570-000');
 
-insert into ubermo.prestador(nome, email, hash, telefone, nota, foto) values
-  ('Prestador', 'prestador@prestador.com', crypt('prestador', gen_salt('bf')), '31 3847-3822',5, 'lorempixel.com/400/400');
+insert into ubermo.prestador(nome, email, hash, telefone, nota, foto, avaliacoes) values
+  ('João da Silva', 'prestador@prestador.com', crypt('prestador', gen_salt('bf')), '31 3847-3822', 4, 'https://lorempixel.com/400/400', 3);
 insert into ubermo.enderecoprestador(prestador, uf, cidade, bairro, logradouro, numero, complemento, cep) values
   ('prestador@prestador.com', 'Minas Gerais', 'Viçosa', 'Centro', 'Av. PH Rolfs', '183', 'Apto 302', '36570-000');
 insert into ubermo.conta(prestador, nomebanco, agencia, conta) VALUES
@@ -160,7 +165,8 @@ insert into ubermo.contratado(
   notacliente,
   notaprestador,
   comentariocliente,
-  comentarioprestador
+  comentarioprestador,
+  endereco
 ) values
   (
     1,
@@ -170,9 +176,10 @@ insert into ubermo.contratado(
     1,
     2,
     4.0,
-    5.0,
+    4.0,
     'Meio arrogante',
-    'Não suja o carro'
+    'Não suja o carro',
+    1
   ),
   (
     2,
@@ -181,10 +188,11 @@ insert into ubermo.contratado(
     NOW() - interval '24 day',
     2,
     2,
-    4.2,
-    5.0,
+    4.0,
+    4.0,
     'Meio arrogante',
-    'Não suja o chão'
+    'Não suja o chão',
+    1
   ),
   (
     3,
@@ -192,11 +200,12 @@ insert into ubermo.contratado(
     NOW() - interval '5 day',
     NULL,
     10,
-    1,
+    2,
     4.0,
-    4.8,
+    4.0,
     'Meio arrogante',
-    'Não suja o violão'
+    'Não suja o violão',
+    1
   );
 
 commit;
